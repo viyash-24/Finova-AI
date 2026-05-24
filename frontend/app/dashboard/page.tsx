@@ -1,15 +1,16 @@
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col h-screen overflow-hidden w-full">
+    <div className="flex flex-col h-screen w-full bg-background">
       {/* TopAppBar */}
-      <header className="bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30 flex justify-between items-center w-full px-md py-sm max-w-container-max mx-auto z-40 sticky top-0">
-        {/* Mobile Menu Button & Brand */}
-        <div className="flex items-center gap-sm md:hidden">
-          <button className="text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-          <h1 className="font-headline-md-mobile text-headline-md-mobile font-bold text-primary">Finova AI</h1>
-        </div>
+      <header className="bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant/30 w-full z-40 sticky top-0">
+        <div className="flex justify-between items-center w-full px-sm md:px-lg py-sm max-w-container-max mx-auto">
+          {/* Mobile Menu Button & Brand */}
+          <div className="flex items-center gap-sm md:hidden">
+            <button className="text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Finova AI</h1>
+          </div>
         
         {/* Search (Left aligned on Desktop) */}
         <div className="hidden md:flex items-center bg-surface-container-low rounded-full px-4 py-2 w-96 border border-outline-variant/50 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
@@ -34,12 +35,14 @@ export default function DashboardPage() {
             <img alt="User profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLo8ESy7BaPQf7h4jP5hZZm40_8OTcOijMEMHNLt3KAyMs_0_ZczpOOiYsUDA0RHm8_roG6PI8cv0Z37itESJLTvRxbyx48LiruDPmjgwmy-eMPq_fCOKAAjB_yZXF4NunPX2vr8juhW6amW6w_rEb5MfoVYw5oQwVmduyszJkm4iQ57vTEb_9tR-bM9VbxVKQOd9Bcmv7G1_unPwQSCzSnVi2d2S3iEOi-i65E6UDhkJfVamTZ4wlph7FWDNgmh0HOt355UUllCLE" />
           </div>
         </div>
+        </div>
       </header>
 
       {/* Scrollable Dashboard Content */}
-      <div className="flex-1 overflow-y-auto p-margin-mobile md:p-lg space-y-lg pb-xl">
-        {/* Top Metrics Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+      <div className="flex-1 overflow-y-auto w-full pb-xl">
+        <div className="max-w-container-max mx-auto p-sm md:p-lg space-y-lg w-full">
+          {/* Top Metrics Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
           {/* Metric 1: Total Income */}
           <div className="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/30 shadow-sm relative overflow-hidden group hover:-translate-y-0.5 transition-transform duration-200">
             <div className="flex justify-between items-start mb-2">
@@ -353,6 +356,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
+        </div>
       </div>
     </div>
   );
