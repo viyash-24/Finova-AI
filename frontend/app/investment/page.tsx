@@ -127,4 +127,93 @@ export default function InvestmentPage() {
                 <button className="px-3 py-1 text-label-sm font-label-sm rounded-md text-on-surface-variant hover:text-on-surface transition-colors">5Y</button>
               </div>
             </div>
+            <div 
+              className="flex-1 relative chart-grid w-full bg-surface-bright" 
+              style={{
+                backgroundImage: `linear-gradient(to right, rgba(192, 200, 204, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(192, 200, 204, 0.1) 1px, transparent 1px)`,
+                backgroundSize: '40px 40px'
+              }}
+            >
+              <div className="absolute left-4 top-4 bottom-8 flex flex-col justify-between text-label-sm font-label-sm text-outline z-10">
+                <span>$150k</span><span>$100k</span><span>$50k</span><span>$0</span>
+              </div>
+              <div className="absolute inset-0 pl-16 pt-8 pr-4 pb-8 w-full h-full">
+                <div 
+                  className="absolute bottom-8 left-16 right-4 h-[60%] bg-gradient-to-t from-primary/20 to-transparent rounded-bl-lg" 
+                  style={{clipPath: 'polygon(0 100%, 0 60%, 20% 50%, 40% 55%, 60% 30%, 80% 20%, 100% 10%, 100% 100%)'}}
+                ></div>
+                <svg className="absolute inset-0 w-full h-full pl-16 pt-8 pr-4 pb-8 overflow-visible" preserveAspectRatio="none">
+                  <path className="drop-shadow-[0_4px_6px_rgba(0,186,255,0.4)]" d="M 0,180 C 100,160 200,170 300,120 C 400,70 500,90 600,40" fill="none" stroke="#00baff" strokeLinecap="round" strokeWidth="4" vectorEffect="non-scaling-stroke"></path>
+                  <circle className="animate-pulse" cx="600" cy="40" fill="#ffffff" r="6" stroke="#00baff" strokeWidth="3" vectorEffect="non-scaling-stroke"></circle>
+                </svg>
+                <svg className="absolute inset-0 w-full h-full pl-16 pt-8 pr-4 pb-8 overflow-visible" preserveAspectRatio="none">
+                  <path d="M 0,180 C 150,175 300,150 450,130 C 550,120 600,110 600,110" fill="none" stroke="#c0c8cc" strokeDasharray="6 6" strokeLinecap="round" strokeWidth="2" vectorEffect="non-scaling-stroke"></path>
+                </svg>
+              </div>
+              <div className="absolute bottom-2 left-16 right-4 flex justify-between text-label-sm font-label-sm text-outline z-10">
+                <span>Jan</span><span>Mar</span><span>Jun</span><span>Sep</span><span>Dec</span>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Suggestion Agent */}
+          <div className="lg:col-span-1 bg-surface-container rounded-2xl border border-primary-fixed/40 ai-glow overflow-hidden flex flex-col relative h-[420px]">
+            <div className="p-md bg-surface-container/60 backdrop-blur-xl border-b border-primary-fixed/20 flex justify-between items-start z-10 relative">
+              <div>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="material-symbols-outlined text-primary text-lg">smart_toy</span>
+                  <h3 className="font-label-md text-label-md text-primary tracking-wide uppercase">AI Strategist</h3>
+                </div>
+                <p className="font-headline-md text-headline-md text-on-background leading-tight">Actionable Insights</p>
+              </div>
+              <button className="w-8 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center text-outline hover:text-primary transition-colors border border-outline-variant/30">
+                <span className="material-symbols-outlined text-sm">more_vert</span>
+              </button>
+            </div>
             
+            <div className="p-md flex-1 flex flex-col gap-md overflow-y-auto relative z-10">
+              {/* Risk Meter */}
+              <div className="bg-surface-container-lowest rounded-xl p-3 border border-outline-variant/30">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-label-sm text-label-sm text-on-surface-variant">Current Risk Posture</span>
+                  <span className="font-label-sm text-label-sm text-primary font-bold">Moderate Growth</span>
+                </div>
+                <div className="h-2 w-full bg-surface-variant rounded-full flex overflow-hidden">
+                  <div className="h-full bg-outline-variant w-1/4"></div>
+                  <div className="h-full bg-outline-variant w-1/4 border-l border-surface-container-lowest"></div>
+                  <div className="h-full bg-primary w-1/4 border-l border-surface-container-lowest relative">
+                    <div className="absolute -top-1 -bottom-1 right-0 w-1 bg-primary-fixed shadow-[0_0_8px_#00baff] rounded-full"></div>
+                  </div>
+                  <div className="h-full bg-surface-container-high w-1/4 border-l border-surface-container-lowest"></div>
+                </div>
+                <div className="flex justify-between mt-1 text-[10px] text-outline uppercase font-semibold">
+                  <span>Safe</span><span>Aggr</span>
+                </div>
+              </div>
+              
+              {/* Growth Opportunities */}
+              <div className="space-y-3">
+                <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Top Recommendations</p>
+                <div className="flex gap-3 items-start group cursor-pointer">
+                  <div className="w-8 h-8 rounded-lg bg-tertiary-fixed/40 flex items-center justify-center text-tertiary group-hover:bg-tertiary-fixed transition-colors shrink-0">
+                    <span className="material-symbols-outlined text-sm">eco</span>
+                  </div>
+                  <div>
+                    <h4 className="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Increase Green Energy ETFs</h4>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">Market models suggest a 12% upside in renewable sectors over the next 6 months.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 items-start group cursor-pointer">
+                  <div className="w-8 h-8 rounded-lg bg-secondary-fixed/50 flex items-center justify-center text-secondary group-hover:bg-secondary-fixed transition-colors shrink-0">
+                    <span className="material-symbols-outlined text-sm">memory</span>
+                  </div>
+                  <div>
+                    <h4 className="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Hold Semi-conductors</h4>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">Volatility expected. Maintain current position weight (15%) until Q3 reports.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary-fixed-dim/20 rounded-full blur-3xl pointer-events-none"></div>
+          </div>
+          
