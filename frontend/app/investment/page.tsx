@@ -217,3 +217,78 @@ export default function InvestmentPage() {
             <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary-fixed-dim/20 rounded-full blur-3xl pointer-events-none"></div>
           </div>
           
+          {/* Portfolio Ideas & Learning */}
+          <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div className="md:col-span-3 flex justify-between items-end mb-xs">
+              <h3 className="font-headline-md text-headline-md text-on-background">Curated For You</h3>
+              <a className="text-primary font-label-sm text-label-sm hover:underline" href="#">View All Strategies</a>
+            </div>
+            
+            {/* Portfolio Card 1 */}
+            <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 shadow-[0_4px_20px_rgba(0,186,255,0.04)] hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group flex flex-col h-full">
+              <div className="flex justify-between items-start mb-3">
+                <div className="w-10 h-10 rounded-lg bg-primary-fixed/30 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined">rocket_launch</span>
+                </div>
+                <span className="bg-primary-fixed/50 text-on-primary-fixed-variant text-[11px] font-bold px-2 py-1 rounded uppercase tracking-wide">Aggressive</span>
+              </div>
+              <h4 className="font-headline-md text-headline-md text-on-surface text-lg mb-1">Emerging Tech Mix</h4>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mb-4">High-growth potential focusing on AI, cloud computing, and biotech innovations.</p>
+              <div className="mt-auto space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-outline">Est. Yield (1Y)</span>
+                  <span className="text-secondary font-semibold">+18.5%</span>
+                </div>
+                <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden flex">
+                  <div className="bg-primary w-[40%]" title="AI Sector 40%"></div>
+                  <div className="bg-secondary-container w-[35%]" title="Cloud 35%"></div>
+                  <div className="bg-tertiary w-[25%]" title="Biotech 25%"></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Portfolio Card 2 */}
+            <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 shadow-[0_4px_20px_rgba(0,186,255,0.04)] hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group flex flex-col h-full">
+              <div className="flex justify-between items-start mb-3">
+                <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined">shield</span>
+                </div>
+                <span className="bg-surface-variant text-on-surface-variant text-[11px] font-bold px-2 py-1 rounded uppercase tracking-wide">Conservative</span>
+              </div>
+              <h4 className="font-headline-md text-headline-md text-on-surface text-lg mb-1">Dividend Aristocrats</h4>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mb-4">Stable income generation from blue-chip companies with decades of dividend growth.</p>
+              <div className="mt-auto space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-outline">Est. Yield (1Y)</span>
+                  <span className="text-secondary font-semibold">+5.2%</span>
+                </div>
+                <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden flex">
+                  <div className="bg-outline w-[70%]" title="Blue Chips 70%"></div>
+                  <div className="bg-outline-variant w-[30%]" title="Bonds 30%"></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Learning Card */}
+            <div className="bg-primary rounded-xl p-4 shadow-md flex flex-col h-full relative overflow-hidden text-on-primary">
+              <div className="absolute -right-4 -top-4 text-white/10 rotate-12 pointer-events-none">
+                <span className="material-symbols-outlined text-[120px]">school</span>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="material-symbols-outlined text-sm">lightbulb</span>
+                  <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-primary/80">Finova Academy</span>
+                </div>
+                <h4 className="font-headline-md text-headline-md text-lg mb-2">Understanding Yield Curves</h4>
+                <p className="font-body-sm text-body-sm text-on-primary/90 line-clamp-3">A yield curve plots interest rates of bonds having equal credit quality but differing maturity dates. It's a key indicator of sentiment.</p>
+              </div>
+              <button className="mt-auto relative z-10 flex items-center gap-1 w-max bg-white text-primary font-label-md text-label-md px-3 py-1.5 rounded-lg hover:bg-primary-fixed transition-colors">
+                Read 2 min summary <span className="material-symbols-outlined text-sm">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
