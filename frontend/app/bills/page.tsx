@@ -16,3 +16,21 @@ export default function BillsPage() {
   const upcoming = bills.filter((b) => b.status === 'upcoming');
   const paid = bills.filter((b) => b.status === 'paid');
   const totalUpcoming = upcoming.reduce((sum, b) => sum + b.amount, 0);
+
+  return (
+    <div className="flex flex-col min-h-screen bg-surface">
+      <TopHeader />
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-[1400px] mx-auto px-8 py-8">
+
+          {/* Page Header */}
+          <div className="flex items-start justify-between mb-8 animate-fade-in-up">
+            <div>
+              <h1 className="text-[28px] font-bold text-text-primary tracking-tight">Bills & Subscriptions</h1>
+              <p className="text-[15px] text-text-secondary mt-1">Manage upcoming payments and subscriptions</p>
+            </div>
+            <button className="h-10 px-4 flex items-center gap-2 bg-primary text-white rounded-xl text-[13px] font-semibold hover:bg-primary-dark transition-colors">
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Add Bill
+            </button>
+          </div>
