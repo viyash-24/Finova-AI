@@ -3,73 +3,112 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const overviewItems = [
+  { name: 'Dashboard', path: '/dashboard', icon: 'grid_view' },
+  { name: 'Expenses', path: '/expenses', icon: 'credit_card' },
+  { name: 'Analytics', path: '/analytics', icon: 'bar_chart' },
+  { name: 'Goals', path: '/goals', icon: 'adjust' },
+  { name: 'Bills', path: '/bills', icon: 'receipt_long' },
+];
+
+const intelligenceItems = [
+  { name: 'AI Assistant', path: '/ai-assistant', icon: 'auto_awesome' },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-    { name: 'Expenses', path: '/expenses', icon: 'payments' },
-    { name: 'Analytics', path: '/analytics', icon: 'insights' },
-    { name: 'Goals', path: '/goals', icon: 'flag' },
-    { name: 'Investment', path: '/investment', icon: 'trending_up' },
-    { name: 'Bills', path: '/bills', icon: 'receipt_long' },
-    { name: 'Income Growth', path: '/income-growth', icon: 'auto_graph' },
-    { name: 'Chat', path: '/', icon: 'forum' },
-    { name: 'Settings', path: '/settings', icon: 'settings' },
-  ];
+  const isActive = (path: string) => {
+    if (path === '/dashboard') return pathname === '/' || pathname === '/dashboard';
+    return pathname === path;
+  };
 
   return (
-    <nav className="h-screen w-64 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant/30 shadow-sm flex flex-col py-lg z-50 hidden md:flex">
-      {/* Brand Header */}
-      <div className="px-md mb-lg flex items-center gap-sm">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary shadow-sm">
-          <span className="material-symbols-outlined filled text-[24px]">network_intelligence</span>
+    <nav className="h-screen w-[260px] fixed left-0 top-0 bg-white border-r border-slate-100 flex flex-col z-50 hidden md:flex">
+      {/* Brand */}
+      <div className="px-6 pt-6 pb-5 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-md shadow-sky-500/20">
+          <span className="material-symbols-outlined filled text-white text-[22px]">
+            account_balance_wallet
+          </span>
         </div>
         <div>
-          <h1 className="font-headline-md text-headline-md font-black text-primary">Finova AI</h1>
-          <p className="font-label-sm text-label-sm text-tertiary flex items-center gap-1 mt-1">
-            <span className="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
-            AI Status: Online
+          <h1 className="text-[17px] font-bold tracking-tight text-slate-900">
+            <span>Finova </span>
+            <span className="text-sky-500">AI</span>
+          </h1>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400 mt-0.5">
+            Personal Finance
           </p>
         </div>
       </div>
-      
-      {/* Main Navigation */}
-      <div className="flex-1 px-sm space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`flex items-center gap-sm px-md py-xs rounded-lg font-label-md text-label-md transition-all ${
-                isActive
-                  ? 'bg-primary-container text-on-primary-container translate-x-1 shadow-sm'
-                  : 'text-on-surface-variant hover:bg-primary-fixed/30 hover:text-primary'
-              }`}
-            >
-              <span className={`material-symbols-outlined ${isActive ? 'filled' : ''}`}>
-                {item.icon}
-              </span>
-              {item.name}
-            </Link>
-          );
-        })}
+
+      {/* Navigation Items */}
+      <div className="flex-1 px-4 overflow-y-auto no-scrollbar">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 px-3 mb-2 mt-4">
+          Overview
+        </p>
+        <div className="space-y-1">
+          {overviewItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition-all duration-200 ${
+                  active
+                    ? 'bg-sky-50 text-sky-600 font-semibold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <span className={`material-symbols-outlined text-[20px] ${active ? 'filled text-sky-500' : 'text-slate-400'}`}>
+                  {item.icon}
+                </span>
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Intelligence Section */}
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400 px-3 mb-2 mt-6">
+          Intelligence
+        </p>
+        <div className="space-y-1">
+          {intelligenceItems.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition-all duration-200 ${
+                  active
+                    ? 'bg-sky-50 text-sky-600 font-semibold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <span className={`material-symbols-outlined text-[20px] ${active ? 'filled text-sky-500' : 'text-slate-400'}`}>
+                  {item.icon}
+                </span>
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
       </div>
-      
-      {/* Footer Navigation */}
-      <div className="px-sm mt-auto space-y-1 pt-md border-t border-outline-variant/30 mx-sm">
+
+      {/* Settings at Bottom */}
+      <div className="px-4 pb-6 pt-3 border-t border-slate-100 bg-white">
         <Link
-          href="/profile"
-          className="flex items-center gap-sm text-on-surface-variant hover:bg-primary-fixed/30 transition-all px-md py-xs rounded-lg font-label-md text-label-md hover:text-primary"
+          href="/settings"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition-all duration-200 ${
+            isActive('/settings')
+              ? 'bg-sky-50 text-sky-600 font-semibold'
+              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+          }`}
         >
-          <span className="material-symbols-outlined">account_circle</span> Profile
-        </Link>
-        <Link
-          href="/help"
-          className="flex items-center gap-sm text-on-surface-variant hover:bg-primary-fixed/30 transition-all px-md py-xs rounded-lg font-label-md text-label-md hover:text-primary"
-        >
-          <span className="material-symbols-outlined">help</span> Help
+          <span className="material-symbols-outlined text-[20px] text-slate-400">settings</span>
+          Settings
         </Link>
       </div>
     </nav>
