@@ -11,3 +11,8 @@ const bills = [
   { id: 6, name: 'Spotify', provider: 'Spotify AB', amount: 9.99, dueDate: 'Aug 10', status: 'paid', icon: 'music_note', iconBg: 'bg-success-bg', iconColor: 'text-success' },
   { id: 7, name: 'Cloud Storage', provider: 'Google One', amount: 2.99, dueDate: 'Aug 5', status: 'paid', icon: 'cloud', iconBg: 'bg-primary-bg', iconColor: 'text-primary' },
 ];
+
+export default function BillsPage() {
+  const upcoming = bills.filter((b) => b.status === 'upcoming');
+  const paid = bills.filter((b) => b.status === 'paid');
+  const totalUpcoming = upcoming.reduce((sum, b) => sum + b.amount, 0);
