@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -17,6 +18,24 @@ const intelligenceItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleToggle = () => setIsOpen((prev) => !prev);
+    const handleClose = () => setIsOpen(false);
+
+    window.addEventListener('toggle-sidebar', handleToggle);
+    window.addEventListener('close-sidebar', handleClose);
+    return () => {
+      window.removeEventListener('toggle-sidebar', handleToggle);
+      window.removeEventListener('close-sidebar', handleClose);
+    };
+  }, []);
+
+  // Close sidebar on path change (mobile)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const isActive = (path: string) => {
     if (path === '/dashboard') return pathname === '/' || pathname === '/dashboard';
@@ -24,7 +43,20 @@ export default function Sidebar() {
   };
 
   return (
-    <nav className="h-screen w-[260px] fixed left-0 top-0 bg-white border-r border-slate-100 flex flex-col z-50 hidden md:flex">
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-slate-950/20 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
+        />
+      )}
+
+      <nav
+        className={`h-screen w-[260px] fixed left-0 top-0 bg-white border-r border-slate-100 flex flex-col z-50 transition-transform duration-300 ease-in-out md:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
       {/* Brand */}
       <div className="px-6 pt-6 pb-5 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-md shadow-sky-500/20">
@@ -112,5 +144,6 @@ export default function Sidebar() {
         </Link>
       </div>
     </nav>
+    </>
   );
 }
