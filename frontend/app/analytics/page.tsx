@@ -72,3 +72,22 @@ export default function AnalyticsPage() {
   useEffect(() => {
     fetchAnalyticsData();
   }, []);
+
+  // Triggers simulated AI analysis on backend
+  const handleTriggerAnalysis = async () => {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch('http://localhost:8000/api/analytics/insights/rerun', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setInsights(data);
+      }
+    } catch (err) {
+      console.error('Failed to rerun insights on backend:', err);
+    } finally {
+      setIsAnalyzing(false);
+      setUpdatedTime('just now');
+    }
+  };
