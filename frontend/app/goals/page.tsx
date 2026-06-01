@@ -192,3 +192,51 @@ export default function GoalsPage() {
               </p>
             </div>
           </div>
+
+          {/* Goals Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {goals.length > 0 ? (
+              goals.map((goal) => {
+                const pct = goal.target > 0 ? Math.min(100, Math.round((goal.current / goal.target) * 100)) : 0;
+                return (
+                  <div key={goal.id} className="bg-white rounded-2xl border border-slate-100 p-6 hover:shadow-lg hover:shadow-sky-500/5 transition-all duration-300 group relative">
+                    <button
+                      onClick={() => handleDeleteGoal(goal.id)}
+                      className="absolute top-4 right-4 w-8 h-8 rounded-lg hover:bg-rose-50 flex items-center justify-center text-rose-400 hover:text-rose-600 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-xl bg-sky-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <span className="material-symbols-outlined text-[22px] text-sky-500">{goal.icon || 'shield'}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-[16px] font-bold text-slate-800">{goal.name}</h3>
+                          <p className="text-[12px] text-slate-400 mt-0.5 font-medium">{pct}% complete</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-sky-500 rounded-full transition-all duration-700" style={{ width: `${pct}%` }}></div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[14px] font-bold text-slate-800">${goal.current.toLocaleString()}</span>
+                      <span className="text-[13px] text-slate-400 font-semibold">of ${goal.target.toLocaleString()}</span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-2 py-12 text-center text-[14px] font-medium text-slate-400">
+                No active savings goals found.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
