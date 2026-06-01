@@ -9,8 +9,8 @@ export default function TopHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [isClerkActive, setIsClerkActive] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [userEmail, setUserEmail] = useState('demo@finova.ai');
-  const [userName, setUserName] = useState('Demo User');
+  const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

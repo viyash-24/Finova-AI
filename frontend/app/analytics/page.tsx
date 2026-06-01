@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TopHeader from '@/components/TopHeader';
 
 interface MonthDataPoint {
@@ -16,26 +16,32 @@ interface AIInsightData {
   icon: string;
 }
 
+interface Expense {
+  id: string;
+  description: string;
+  category: string;
+  date: string;
+  amount: number;
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Housing: '#0ea5e9', // Blue
+  Food: '#10b981', // Green
+  Transport: '#a855f7', // Purple
+  Entertainment: '#f59e0b', // Orange/Yellow
+  Shopping: '#f43f5e', // Rose/Red
+  Other: '#64748b', // Grey
+};
+
+const CATEGORIES = ['Housing', 'Food', 'Transport', 'Entertainment', 'Shopping', 'Dress', 'Other'];
+
 export default function AnalyticsPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [updatedTime, setUpdatedTime] = useState('5 minutes ago');
 
-  const [monthsData, setMonthsData] = useState<MonthDataPoint[]>([
-    { label: 'Jan', income: 64, expenses: 38 },
-    { label: 'Feb', income: 67, expenses: 41 },
-    { label: 'Mar', income: 65, expenses: 36 },
-    { label: 'Apr', income: 70, expenses: 45 },
-    { label: 'May', income: 73, expenses: 41 },
-    { label: 'Jun', income: 77, expenses: 44 },
-    { label: 'Jul', income: 75, expenses: 46 },
-    { label: 'Aug', income: 78, expenses: 43 },
-  ]);
-
-  const [insights, setInsights] = useState<AIInsightData[]>([
-    { id: '1', title: 'Food spending down 12%', description: "Compared to your 3-month average. Keep meal-prepping on Sundays — it's working.", icon: 'restaurant' },
-    { id: '2', title: 'Transport up 24% this month', description: "Mostly rideshare. Could a monthly transit pass save ~$80?", icon: 'local_taxi' },
-    { id: '3', title: 'Predicted Sept spend: $3,520', description: 'Based on seasonal patterns and your recurring bills.', icon: 'online_prediction' },
-  ]);
+  const [monthsData, setMonthsData] = useState<MonthDataPoint[]>([]);
+  const [insights, setInsights] = useState<AIInsightData[]>([]);
+  const [expenseList, setExpenseList] = useState<Expense[]>([]);
 
   const fetchAnalyticsData = async () => {
     try {
@@ -67,6 +73,16 @@ export default function AnalyticsPage() {
     } catch (err) {
       console.warn('Could not fetch AI insights from backend.', err);
     }
+
+    try {
+      const res = await fetch('http://localhost:8000/api/expenses');
+      if (res.ok) {
+        const data = await res.json();
+        setExpenseList(data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch expenses for category breakdown.', err);
+    }
   };
 
   useEffect(() => {
@@ -91,6 +107,54 @@ export default function AnalyticsPage() {
       setUpdatedTime('just now');
     }
   };
+
+  // Group expenses by category
+  const categoryBreakdown = useMemo(() => {
+    const totals: Record<string, number> = {
+      Housing: 0,
+      Food: 0,
+      Transport: 0,
+      Entertainment: 0,
+      Shopping: 0,
+      Other: 0
+    };
+    
+    let grandTotal = 0;
+    
+    expenseList.forEach((exp) => {
+      let cat = exp.category || 'Other';
+      if (!totals.hasOwnProperty(cat)) {
+        cat = 'Other';
+      }
+      totals[cat] += exp.amount;
+      grandTotal += exp.amount;
+    });
+
+    return { totals, grandTotal };
+  }, [expenseList]);
+
+  const segments = useMemo(() => {
+    const { totals, grandTotal } = categoryBreakdown;
+    if (grandTotal === 0) return [];
+    
+    let accumulatedLength = 0;
+    return CATEGORIES.map((cat) => {
+      const amount = totals[cat] || 0;
+      const pct = amount / grandTotal;
+      const strokeLength = pct * 377;
+      const offset = -accumulatedLength;
+      accumulatedLength += strokeLength;
+      
+      return {
+        category: cat,
+        amount,
+        percentage: Math.round(pct * 100),
+        strokeLength,
+        offset,
+        color: CATEGORY_COLORS[cat]
+      };
+    });
+  }, [categoryBreakdown]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-white">
@@ -179,90 +243,141 @@ export default function AnalyticsPage() {
                 <p className="text-[12px] text-slate-400 font-semibold tracking-wide mt-0.5">Where your money goes</p>
               </div>
 
-              {/* Donut Chart SVG */}
-              <div className="flex justify-center items-center my-6 h-[280px]">
-                <div className="relative w-56 h-56">
-                  <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
-                    {/* Concentric Segments with spacing gaps */}
-                    {/* Total circumference: 376.99 (radius 60) */}
-                    
-                    {/* Housing - Blue (40%) */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="60"
-                      fill="none"
-                      stroke="#0ea5e9"
-                      strokeWidth="24"
-                      strokeDasharray="148 377"
-                      strokeDashoffset="0"
-                      className="transition-all duration-500 hover:opacity-90"
-                    />
+              {categoryBreakdown.grandTotal > 0 ? (
+                <>
+                  {/* Donut Chart SVG */}
+                  <div className="flex justify-center items-center my-6 h-[280px]">
+                    <div className="relative w-56 h-56">
+                      <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                        {segments.map((seg) => {
+                          if (seg.strokeLength === 0) return null;
+                          return (
+                            <circle
+                              key={seg.category}
+                              cx="100"
+                              cy="100"
+                              r="60"
+                              fill="none"
+                              stroke={seg.color}
+                              strokeWidth="24"
+                              strokeDasharray={`${seg.strokeLength} 377`}
+                              strokeDashoffset={seg.offset}
+                              className="transition-all duration-500 hover:opacity-90"
+                            />
+                          );
+                        })}
+                      </svg>
+                    </div>
+                  </div>
 
-                    {/* Food - Green (25%) */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="60"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="24"
-                      strokeDasharray="91 377"
-                      strokeDashoffset="-151"
-                      className="transition-all duration-500 hover:opacity-90"
-                    />
-
-                    {/* Transport - Purple (12%) */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="60"
-                      fill="none"
-                      stroke="#a855f7"
-                      strokeWidth="24"
-                      strokeDasharray="43 377"
-                      strokeDashoffset="-245"
-                      className="transition-all duration-500 hover:opacity-90"
-                    />
-
-                    {/* Entertainment - Orange/Yellow (8%) */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="60"
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="24"
-                      strokeDasharray="28 377"
-                      strokeDashoffset="-291"
-                      className="transition-all duration-500 hover:opacity-90"
-                    />
-
-                    {/* Shopping - Rose/Red (12%) */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="60"
-                      fill="none"
-                      stroke="#f43f5e"
-                      strokeWidth="24"
-                      strokeDasharray="43 377"
-                      strokeDashoffset="-322"
-                      className="transition-all duration-500 hover:opacity-90"
-                    />
-
-                    {/* Other - Grey (3%) */}
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="60"
-                      fill="none"
-                      stroke="#64748b"
-                      strokeWidth="24"
-                      strokeDasharray="9 377"
-                      strokeDashoffset="-368"
-                      className="transition-all duration-500 hover:opacity-90"
-                    />
-                  </svg>
+                  {/* Category Legend Grid */}
+                  <div className="grid grid-cols-3 gap-y-3 gap-x-2 text-center max-w-md mx-auto mt-4">
+                    {segments.map((seg) => {
+                      if (seg.amount === 0) return null;
+                      return (
+                        <div key={seg.category} className="flex items-center justify-center gap-1.5">
+                          <span className="w-3.5 h-3.5 rounded" style={{ backgroundColor: seg.color }}></span>
+                          <span className="text-[12px] font-bold" style={{ color: seg.color }}>
+                            {seg.category} ({seg.percentage}%)
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col justify-center items-center my-6 h-[280px] text-slate-400 text-[14px] font-medium text-center px-4">
+                  <span className="material-symbols-outlined text-[48px] text-slate-300 mb-2">pie_chart</span>
+                  No expenses logged to calculate category distribution.
                 </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Expense Analysis Agent Card */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-[0_12px_40px_rgba(59,130,246,0.04)] relative overflow-hidden">
+            
+            {/* Background decorative glow */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-[18px] font-bold text-slate-900">AI-Generated Insights</h3>
+                  <span className="bg-sky-55/60 text-sky-600 border border-sky-100 text-[11px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    Beta
+                  </span>
+                </div>
+                <p className="text-[13px] text-slate-400 font-semibold mt-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-sky-500 rounded-full animate-pulse"></span>
+                  Updated {updatedTime}
+                </p>
               </div>
+
+              {/* Refresh trigger button */}
+              <button
+                onClick={handleTriggerAnalysis}
+                disabled={isAnalyzing}
+                className="h-10 px-4 flex items-center gap-2 bg-slate-50 hover:bg-sky-50/70 border border-slate-200 hover:border-sky-200 rounded-xl text-[13px] font-bold text-slate-600 hover:text-sky-700 transition-all cursor-pointer select-none active:scale-95 disabled:opacity-50"
+              >
+                <span className={`material-symbols-outlined text-[18px] ${isAnalyzing ? 'animate-spin' : ''}`}>
+                  sync
+                </span>
+                {isAnalyzing ? 'Analyzing spending...' : 'Re-run Analysis'}
+              </button>
+            </div>
+
+            {/* Analysis Loader Grid block */}
+            {isAnalyzing ? (
+              <div className="h-[200px] flex flex-col items-center justify-center gap-4 bg-slate-50/40 rounded-2xl border border-slate-100 border-dashed">
+                <div className="w-10 h-10 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin"></div>
+                <p className="text-[13px] font-bold text-slate-500">Agent scanning transactions database...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                {insights.map((insight, index) => {
+                  let accentColor = 'sky';
+                  let bgClass = 'bg-sky-50';
+                  let textClass = 'text-[#3b82f6]';
+
+                  if (insight.icon === 'restaurant') {
+                    accentColor = 'emerald';
+                    bgClass = 'bg-emerald-50';
+                    textClass = 'text-[#10b981]';
+                  } else if (insight.icon === 'local_taxi') {
+                    accentColor = 'rose';
+                    bgClass = 'bg-rose-50';
+                    textClass = 'text-[#f43f5e]';
+                  }
+
+                  return (
+                    <div
+                      key={insight.id || index}
+                      className="bg-slate-50/60 hover:bg-white border border-slate-100 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/5 group flex flex-col justify-between h-[150px]"
+                    >
+                      <div className="flex items-start justify-between">
+                        <h4 className="text-[15px] font-bold text-slate-900 leading-tight">
+                          {insight.title}
+                        </h4>
+                        <span className={`material-symbols-outlined ${textClass} text-[22px] ${bgClass} p-1.5 rounded-lg group-hover:scale-110 transition-transform`}>
+                          {insight.icon || 'auto_awesome'}
+                        </span>
+                      </div>
+                      <p className="text-[13px] text-slate-500 leading-relaxed font-medium mt-2">
+                        {insight.description}
+                      </p>
+                    </div>
+                  );
+                })}
+
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
