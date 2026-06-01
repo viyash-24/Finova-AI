@@ -34,3 +34,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const CATEGORIES = ['Housing', 'Food', 'Transport', 'Entertainment', 'Shopping', 'Dress', 'Other'];
+
+export default function AnalyticsPage() {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [updatedTime, setUpdatedTime] = useState('5 minutes ago');
+
+  const [monthsData, setMonthsData] = useState<MonthDataPoint[]>([]);
+  const [insights, setInsights] = useState<AIInsightData[]>([]);
+  const [expenseList, setExpenseList] = useState<Expense[]>([]);
