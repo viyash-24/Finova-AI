@@ -42,3 +42,22 @@ export default function AnalyticsPage() {
   const [monthsData, setMonthsData] = useState<MonthDataPoint[]>([]);
   const [insights, setInsights] = useState<AIInsightData[]>([]);
   const [expenseList, setExpenseList] = useState<Expense[]>([]);
+
+  const fetchAnalyticsData = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/dashboard');
+      if (res.ok) {
+        const d = await res.json();
+        if (d.cashFlow && d.cashFlow.length > 0) {
+          const mapped = d.cashFlow.map((item: any) => ({
+            label: item.month,
+            // Map values to percentage height
+            income: (item.income / 8000) * 80,
+            expenses: (item.expenses / 8000) * 80,
+          }));
+          setMonthsData(mapped);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch chart coordinates from backend.', err);
+    }
