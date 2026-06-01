@@ -32,3 +32,39 @@ export default function GoalsPage() {
       console.warn('Could not fetch goals from backend. Using empty list fallback.', err);
     }
   };
+
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
+  const handleAddGoal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedTarget = parseFloat(target);
+    const parsedCurrent = parseFloat(current || '0');
+    if (!name || isNaN(parsedTarget) || parsedTarget <= 0) return;
+
+    try {
+      const res = await fetch('http://localhost:8000/api/goals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          target: parsedTarget,
+          current: parsedCurrent,
+          deadline: deadline || 'Dec 2026',
+          icon
+        }),
+      });
+      if (res.ok) {
+        const newGoal = await res.json();
+        setGoals((prev) => [...prev, newGoal]);
+        setName('');
+        setTarget('');
+        setCurrent('');
+        setDeadline('');
+        setShowAddForm(false);
+      }
+    } catch (err) {
+      console.error('Failed to add goal:', err);
+    }
+  };
