@@ -166,3 +166,29 @@ export default function GoalsPage() {
               </form>
             </div>
           )}
+
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Active Goals</p>
+              <h2 className="text-[28px] font-bold text-slate-900">{goals.length}</h2>
+              <p className="text-[13px] text-slate-400 mt-2 font-medium">Average progress {avgProgress}%</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Total Saved</p>
+              <h2 className="text-[28px] font-bold text-slate-900">${totalSaved.toLocaleString()}</h2>
+              <div className="flex items-center gap-1 mt-2 text-emerald-500 text-[13px] font-semibold">
+                <span className="material-symbols-outlined text-[16px]">north_east</span>
+                of ${totalTarget.toLocaleString()} goal target
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Monthly Contribution</p>
+              <h2 className="text-[28px] font-bold text-slate-900">
+                ${goals.length > 0 ? '850' : '0'}
+              </h2>
+              <p className="text-[13px] text-slate-400 mt-2 font-medium">
+                {goals.length > 0 ? 'Auto-transfers enabled' : 'Auto-transfers disabled'}
+              </p>
+            </div>
+          </div>
