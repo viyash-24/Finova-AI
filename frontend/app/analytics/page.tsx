@@ -327,3 +327,57 @@ export default function AnalyticsPage() {
                 {isAnalyzing ? 'Analyzing spending...' : 'Re-run Analysis'}
               </button>
             </div>
+
+            {/* Analysis Loader Grid block */}
+            {isAnalyzing ? (
+              <div className="h-[200px] flex flex-col items-center justify-center gap-4 bg-slate-50/40 rounded-2xl border border-slate-100 border-dashed">
+                <div className="w-10 h-10 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin"></div>
+                <p className="text-[13px] font-bold text-slate-500">Agent scanning transactions database...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                {insights.map((insight, index) => {
+                  let accentColor = 'sky';
+                  let bgClass = 'bg-sky-50';
+                  let textClass = 'text-[#3b82f6]';
+
+                  if (insight.icon === 'restaurant') {
+                    accentColor = 'emerald';
+                    bgClass = 'bg-emerald-50';
+                    textClass = 'text-[#10b981]';
+                  } else if (insight.icon === 'local_taxi') {
+                    accentColor = 'rose';
+                    bgClass = 'bg-rose-50';
+                    textClass = 'text-[#f43f5e]';
+                  }
+
+                  return (
+                    <div
+                      key={insight.id || index}
+                      className="bg-slate-50/60 hover:bg-white border border-slate-100 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/5 group flex flex-col justify-between h-[150px]"
+                    >
+                      <div className="flex items-start justify-between">
+                        <h4 className="text-[15px] font-bold text-slate-900 leading-tight">
+                          {insight.title}
+                        </h4>
+                        <span className={`material-symbols-outlined ${textClass} text-[22px] ${bgClass} p-1.5 rounded-lg group-hover:scale-110 transition-transform`}>
+                          {insight.icon || 'auto_awesome'}
+                        </span>
+                      </div>
+                      <p className="text-[13px] text-slate-500 leading-relaxed font-medium mt-2">
+                        {insight.description}
+                      </p>
+                    </div>
+                  );
+                })}
+
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
