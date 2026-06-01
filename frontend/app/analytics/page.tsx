@@ -61,3 +61,26 @@ export default function AnalyticsPage() {
     } catch (err) {
       console.warn('Could not fetch chart coordinates from backend.', err);
     }
+
+    try {
+      const res = await fetch('http://localhost:8000/api/analytics/insights');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0) {
+          setInsights(data);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch AI insights from backend.', err);
+    }
+
+    try {
+      const res = await fetch('http://localhost:8000/api/expenses');
+      if (res.ok) {
+        const data = await res.json();
+        setExpenseList(data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch expenses for category breakdown.', err);
+    }
+  };
