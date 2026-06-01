@@ -20,3 +20,15 @@ export default function GoalsPage() {
   const [current, setCurrent] = useState('');
   const [deadline, setDeadline] = useState('');
   const [icon, setIcon] = useState('shield');
+
+  const fetchGoals = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/goals');
+      if (res.ok) {
+        const data = await res.json();
+        setGoals(data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch goals from backend. Using empty list fallback.', err);
+    }
+  };
