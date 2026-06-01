@@ -81,3 +81,28 @@ export default function GoalsPage() {
       console.error('Failed to delete goal:', err);
     }
   };
+
+  const totalTarget = goals.reduce((sum, g) => sum + g.target, 0);
+  const totalSaved = goals.reduce((sum, g) => sum + g.current, 0);
+  const avgProgress = goals.length > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-white">
+      <TopHeader />
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-[1400px] mx-auto px-8 py-8">
+
+          {/* Page Header */}
+          <div className="flex items-start justify-between mb-8 animate-fade-in-up">
+            <div>
+              <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Goals</h1>
+              <p className="text-[14px] text-slate-500 mt-0.5 font-medium">Track progress toward your financial goals</p>
+            </div>
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="h-10 px-4 flex items-center gap-2 bg-sky-500 text-white rounded-xl text-[13px] font-bold hover:bg-sky-600 transition-all shadow-md shadow-sky-500/20 active:scale-95 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              {showAddForm ? 'Cancel' : 'New Goal'}
+            </button>
+          </div>
