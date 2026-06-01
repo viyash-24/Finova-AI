@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 
 const overviewItems = [
   { name: 'Dashboard', path: '/dashboard', icon: 'grid_view' },
+  { name: 'Income', path: '/income', icon: 'payments' },
   { name: 'Expenses', path: '/expenses', icon: 'credit_card' },
   { name: 'Analytics', path: '/analytics', icon: 'bar_chart' },
   { name: 'Goals', path: '/goals', icon: 'adjust' },
@@ -59,10 +60,8 @@ export default function Sidebar() {
       >
       {/* Brand */}
       <div className="px-6 pt-6 pb-5 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-md shadow-sky-500/20">
-          <span className="material-symbols-outlined filled text-white text-[22px]">
-            account_balance_wallet
-          </span>
+        <div className="w-10 h-10 flex items-center justify-center">
+          <img src="/finova_logo.svg" alt="Finova AI Logo" className="w-10 h-10 object-contain" />
         </div>
         <div>
           <h1 className="text-[17px] font-bold tracking-tight text-slate-900">
