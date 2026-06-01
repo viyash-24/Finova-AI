@@ -235,3 +235,95 @@ export default function AnalyticsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Category Distribution Donut Chart Card */}
+            <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-[0_12px_40px_rgba(59,130,246,0.04)] flex flex-col justify-between">
+              <div>
+                <h3 className="text-[17px] font-bold text-slate-900">Category Distribution</h3>
+                <p className="text-[12px] text-slate-400 font-semibold tracking-wide mt-0.5">Where your money goes</p>
+              </div>
+
+              {categoryBreakdown.grandTotal > 0 ? (
+                <>
+                  {/* Donut Chart SVG */}
+                  <div className="flex justify-center items-center my-6 h-[280px]">
+                    <div className="relative w-56 h-56">
+                      <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                        {segments.map((seg) => {
+                          if (seg.strokeLength === 0) return null;
+                          return (
+                            <circle
+                              key={seg.category}
+                              cx="100"
+                              cy="100"
+                              r="60"
+                              fill="none"
+                              stroke={seg.color}
+                              strokeWidth="24"
+                              strokeDasharray={`${seg.strokeLength} 377`}
+                              strokeDashoffset={seg.offset}
+                              className="transition-all duration-500 hover:opacity-90"
+                            />
+                          );
+                        })}
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Category Legend Grid */}
+                  <div className="grid grid-cols-3 gap-y-3 gap-x-2 text-center max-w-md mx-auto mt-4">
+                    {segments.map((seg) => {
+                      if (seg.amount === 0) return null;
+                      return (
+                        <div key={seg.category} className="flex items-center justify-center gap-1.5">
+                          <span className="w-3.5 h-3.5 rounded" style={{ backgroundColor: seg.color }}></span>
+                          <span className="text-[12px] font-bold" style={{ color: seg.color }}>
+                            {seg.category} ({seg.percentage}%)
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col justify-center items-center my-6 h-[280px] text-slate-400 text-[14px] font-medium text-center px-4">
+                  <span className="material-symbols-outlined text-[48px] text-slate-300 mb-2">pie_chart</span>
+                  No expenses logged to calculate category distribution.
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Expense Analysis Agent Card */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-[0_12px_40px_rgba(59,130,246,0.04)] relative overflow-hidden">
+            
+            {/* Background decorative glow */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-[18px] font-bold text-slate-900">AI-Generated Insights</h3>
+                  <span className="bg-sky-55/60 text-sky-600 border border-sky-100 text-[11px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
+                    Beta
+                  </span>
+                </div>
+                <p className="text-[13px] text-slate-400 font-semibold mt-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 bg-sky-500 rounded-full animate-pulse"></span>
+                  Updated {updatedTime}
+                </p>
+              </div>
+
+              {/* Refresh trigger button */}
+              <button
+                onClick={handleTriggerAnalysis}
+                disabled={isAnalyzing}
+                className="h-10 px-4 flex items-center gap-2 bg-slate-50 hover:bg-sky-50/70 border border-slate-200 hover:border-sky-200 rounded-xl text-[13px] font-bold text-slate-600 hover:text-sky-700 transition-all cursor-pointer select-none active:scale-95 disabled:opacity-50"
+              >
+                <span className={`material-symbols-outlined text-[18px] ${isAnalyzing ? 'animate-spin' : ''}`}>
+                  sync
+                </span>
+                {isAnalyzing ? 'Analyzing spending...' : 'Re-run Analysis'}
+              </button>
+            </div>
