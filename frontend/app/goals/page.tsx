@@ -68,3 +68,16 @@ export default function GoalsPage() {
       console.error('Failed to add goal:', err);
     }
   };
+
+  const handleDeleteGoal = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/goals/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setGoals((prev) => prev.filter((g) => g.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to delete goal:', err);
+    }
+  };
