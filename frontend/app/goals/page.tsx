@@ -106,3 +106,63 @@ export default function GoalsPage() {
               {showAddForm ? 'Cancel' : 'New Goal'}
             </button>
           </div>
+
+          {/* Add Goal Form Card */}
+          {showAddForm && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-[0_10px_35px_rgba(59,130,246,0.04)] mb-8 animate-fade-in-up">
+              <h3 className="text-[16px] font-bold text-slate-900 mb-6">Create New Goal</h3>
+              <form onSubmit={handleAddGoal} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Goal Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Dream House"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Target Amount ($)</label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="e.g. 50000"
+                    value={target}
+                    onChange={(e) => setTarget(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Current Saved ($)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 1000"
+                    value={current}
+                    onChange={(e) => setCurrent(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Deadline</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Dec 2026"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div className="md:col-span-4 flex justify-end">
+                  <button
+                    type="submit"
+                    className="h-11 px-6 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl text-[14px] font-bold shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[18px] font-bold">add</span>
+                    Create Goal
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
