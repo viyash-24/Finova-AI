@@ -124,7 +124,7 @@ export default function GoalsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Target Amount ($)</label>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Target Amount (Rs.)</label>
                   <input
                     type="number"
                     required
@@ -135,7 +135,7 @@ export default function GoalsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Current Saved ($)</label>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Current Saved (Rs.)</label>
                   <input
                     type="number"
                     placeholder="e.g. 1000"
@@ -176,16 +176,16 @@ export default function GoalsPage() {
             </div>
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
               <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Total Saved</p>
-              <h2 className="text-[28px] font-bold text-slate-900">${totalSaved.toLocaleString()}</h2>
+              <h2 className="text-[28px] font-bold text-slate-900">Rs. {totalSaved.toLocaleString()}</h2>
               <div className="flex items-center gap-1 mt-2 text-emerald-500 text-[13px] font-semibold">
                 <span className="material-symbols-outlined text-[16px]">north_east</span>
-                of ${totalTarget.toLocaleString()} goal target
+                of Rs. {totalTarget.toLocaleString()} goal target
               </div>
             </div>
             <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
               <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Monthly Contribution</p>
               <h2 className="text-[28px] font-bold text-slate-900">
-                ${goals.length > 0 ? '850' : '0'}
+                Rs. {goals.length > 0 ? '850' : '0'}
               </h2>
               <p className="text-[13px] text-slate-400 mt-2 font-medium">
                 {goals.length > 0 ? 'Auto-transfers enabled' : 'Auto-transfers disabled'}
@@ -223,8 +223,8 @@ export default function GoalsPage() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-bold text-slate-800">${goal.current.toLocaleString()}</span>
-                      <span className="text-[13px] text-slate-400 font-semibold">of ${goal.target.toLocaleString()}</span>
+                      <span className="text-[14px] font-bold text-slate-800">Rs. {goal.current.toLocaleString()}</span>
+                      <span className="text-[13px] text-slate-400 font-semibold">of Rs. {goal.target.toLocaleString()}</span>
                     </div>
                   </div>
                 );
