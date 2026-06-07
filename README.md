@@ -1,289 +1,453 @@
-#  Finova AI – Intelligent Personal Finance Manager
+# Finova AI 💰
 
-Finova AI is a next-generation AI-powered personal finance management platform designed to help individuals gain complete control over their financial life through intelligent automation, predictive analytics, and personalized financial guidance.
+### AI-Powered Personal Finance Management Platform
 
-Unlike traditional expense tracking applications that only record transactions, Finova AI acts as a personal AI financial advisor. The platform continuously analyzes user spending behavior, identifies financial patterns, provides actionable recommendations, and helps users make smarter financial decisions.
+Finova AI is a modern AI-powered personal finance management platform that helps users track expenses, manage budgets, achieve savings goals, monitor bills, and receive intelligent financial recommendations through a multi-agent AI architecture.
 
-By combining Artificial Intelligence, Multi-Agent Systems, Data Analytics, and Financial Management principles, Finova AI transforms raw financial data into meaningful insights that support budgeting, saving, investing, and long-term financial planning.
-
----
-
-##  Vision
-
-To empower individuals with AI-driven financial intelligence that enables better spending habits, improved savings, informed investment decisions, and long-term financial stability.
+The platform combines financial analytics, budgeting tools, goal tracking, and AI-driven insights to help users make smarter financial decisions and improve their overall financial health.
 
 ---
 
-##  Objectives
+## 🚀 Features
 
-Finova AI aims to:
+### 💵 Expense Management
 
-* Simplify personal financial management
-* Improve spending awareness
-* Encourage responsible budgeting
-* Promote healthy saving habits
-* Deliver personalized financial insights
-* Provide intelligent investment guidance
-* Help users achieve financial goals faster
-* Reduce financial uncertainty through predictive analytics
+* Add and manage daily expenses
+* Categorize expenses automatically
+* Track spending history
+* Monitor spending trends
+* View category-wise expenses
 
----
+### 📊 Smart Analytics Dashboard
 
-##  Key Highlights
-
-###  AI-Powered Financial Intelligence
-
-Finova AI leverages advanced AI technologies to analyze financial activities and generate personalized recommendations tailored to each user's financial situation.
-
-###  Advanced Analytics Dashboard
-
-Interactive visual dashboards provide comprehensive insights into spending behavior, savings progress, budget utilization, and financial trends.
-
-###  Personalized Recommendations
-
-The platform identifies overspending patterns, savings opportunities, investment possibilities, and income growth strategies using intelligent AI agents.
-
-###  Goal-Oriented Financial Planning
-
-Users can define financial goals and receive AI-generated plans to achieve them efficiently through structured savings strategies.
-
-###  Predictive Financial Analytics
-
-Machine learning-powered predictions help users anticipate future expenses, identify budget risks, and make proactive financial decisions.
-
-###  Secure & Scalable Architecture
-
-Built using modern enterprise-grade technologies with secure authentication, scalable backend services, and reliable data management.
-
----
-
-#  Core Features
-
-## Expense Management
-
-Track daily financial activities through an intuitive expense management system that records, organizes, and analyzes spending behavior across multiple categories.
-
-### Capabilities
-
-* Daily expense tracking
-* Expense categorization
-* Transaction history management
-* Spending trend analysis
-* Category-based reporting
-
----
-
-## AI Expense Analysis
-
-The AI engine continuously evaluates spending patterns and provides actionable insights that help users understand where their money goes and how they can improve their financial habits.
-
-### Insights Generated
-
-* Spending behavior analysis
-* Overspending detection
-* Expense trend identification
-* Category-level financial insights
-* Personalized recommendations
-
----
-
-## Smart Budget Management
-
-Create and manage budgets intelligently with AI-generated recommendations based on historical spending behavior and financial goals.
-
-### Features
-
-* Monthly budget planning
-* Category-based spending limits
+* Expense distribution analysis
+* Spending trend visualization
+* Monthly financial reports
 * Budget performance tracking
-* Overspending alerts
-* Budget optimization recommendations
+* Financial health scoring
+
+### 🎯 Financial Goal Management
+
+* Create savings goals
+* Track progress toward goals
+* Receive AI-generated saving plans
+* Predict goal completion timelines
+
+### 💰 Budget Planning
+
+* Set monthly budgets
+* Define category spending limits
+* Compare budget vs actual spending
+* Receive overspending alerts
+
+### 🔔 Bill Management
+
+* Manage recurring bills
+* Monitor due dates
+* Receive bill reminders
+* Track overdue payments
+
+### 🤖 AI Financial Assistant
+
+* Personalized financial recommendations
+* Spending analysis
+* Budget optimization
+* Savings strategies
+* Investment guidance
+* Income growth suggestions
 
 ---
 
-## Financial Goal Management
+## 🎯 Problem Statement
 
-Set personal financial goals and monitor progress through AI-assisted planning and forecasting.
+Managing personal finances is often difficult due to fragmented tracking methods, lack of financial visibility, and limited access to personalized financial advice.
 
-### Example Goals
-
-* Emergency funds
-* Education savings
-* Travel funds
-* Technology purchases
-* Vehicle ownership
-* Investment targets
+Most users struggle to understand spending habits, maintain budgets, achieve savings goals, and make informed financial decisions.
 
 ---
 
-## Intelligent Bill Management
+## 💡 Solution
 
-Track recurring bills and receive proactive reminders before payment deadlines to avoid penalties and maintain financial discipline.
+Finova AI addresses these challenges by acting as an intelligent financial assistant that helps users:
 
-### Features
-
-* Recurring bill tracking
-* Due date monitoring
-* Payment reminders
-* Overdue notifications
-
----
-
-## AI Financial Assistant
-
-An intelligent conversational assistant powered by advanced language models capable of answering financial questions and providing personalized financial guidance.
-
-### Example Questions
-
-* How can I reduce my monthly expenses?
-* Why am I overspending?
-* What savings strategy should I follow?
-* How can I improve my financial health score?
-* What investment options are suitable for beginners?
+* Track expenses efficiently
+* Understand spending behavior
+* Improve savings habits
+* Monitor financial goals
+* Manage recurring bills
+* Receive AI-powered recommendations
+* Build long-term financial discipline
 
 ---
 
-## Monthly Financial Reports
+## 🤖 AI Agent Architecture
 
-Automatically generated financial summaries provide a clear overview of financial performance and progress.
-
-### Report Contents
-
-* Spending summary
-* Savings analysis
-* Budget performance
-* Financial health evaluation
-* AI-generated recommendations
-
----
-
-## Financial Health Score
-
-Finova AI calculates a comprehensive financial health score that evaluates overall financial wellbeing using multiple financial indicators.
-
-The score helps users understand their current financial position and identify areas for improvement.
-
----
-
-#  Multi-Agent AI Architecture
-
-Finova AI incorporates specialized AI agents, each designed to solve a specific financial challenge.
+Finova AI uses a multi-agent AI system powered by LangChain and Google Gemini.
 
 ### Expense Analysis Agent
 
-Analyzes spending patterns, identifies trends, and generates financial insights.
+**Responsibilities**
+
+* Analyze spending behavior
+* Categorize expenses
+* Detect overspending
+* Identify spending trends
+* Generate financial insights
+
+**Outputs**
+
+* Spending trends
+* Category analysis
+* Overspending alerts
+* Monthly comparisons
+
+---
 
 ### Savings Planner Agent
 
-Creates personalized saving strategies and budget recommendations.
+**Responsibilities**
+
+* Create personalized budgets
+* Generate savings plans
+* Suggest spending reductions
+* Improve saving habits
+
+**Outputs**
+
+* Budget recommendations
+* Savings opportunities
+* Goal-based planning
+* Financial discipline strategies
+
+---
 
 ### Investment Suggestion Agent
 
-Provides beginner-friendly investment guidance and growth opportunities.
+**Responsibilities**
+
+* Analyze financial surplus
+* Evaluate risk profile
+* Suggest investment opportunities
+
+**Outputs**
+
+* Investment recommendations
+* Risk assessment
+* Growth strategies
+
+---
 
 ### Bill Reminder Agent
 
-Tracks recurring expenses and ensures timely bill payments.
+**Responsibilities**
+
+* Monitor recurring bills
+* Track due dates
+* Detect overdue payments
+
+**Outputs**
+
+* Bill reminders
+* Payment notifications
+* Monthly bill summaries
+
+---
 
 ### Income Growth Agent
 
-Suggests income-generating opportunities based on skills and interests.
+**Responsibilities**
 
-### Financial Chat Agent
+* Suggest additional income sources
+* Recommend freelancing opportunities
+* Provide passive income ideas
 
-Offers conversational financial support and personalized recommendations.
+**Outputs**
+
+* Side hustle recommendations
+* Skill monetization strategies
+* Income growth suggestions
 
 ---
 
-#  Technology Stack
+## 🛠 Technology Stack
 
-### Frontend
+| Layer             | Technology           |
+| ----------------- | -------------------- |
+| Frontend          | Next.js + TypeScript |
+| Styling           | Tailwind CSS         |
+| Backend           | FastAPI              |
+| Database          | PostgreSQL           |
+| Authentication    | Clerk                |
+| AI Framework      | LangChain            |
+| AI Model          | Gemini API           |
+| State Management  | Zustand              |
+| Charts            | Recharts             |
+| API Communication | Axios                |
 
-* Next.js
-* TypeScript
-* Tailwind CSS
-* Zustand
-* Axios
-* Recharts
-* Shadcn UI
+---
 
-### Backend
+## 📸 Screenshots
 
-* FastAPI
-* Python
+### Dashboard
 
-### Database
+*Add dashboard screenshot here*
 
+### Analytics
+
+*Add analytics screenshot here*
+
+### AI Assistant
+
+*Add AI chat screenshot here*
+
+### Goals Management
+
+*Add goals page screenshot here*
+
+---
+
+## ⚙️ Installation
+
+### Prerequisites
+
+Make sure the following software is installed:
+
+* Node.js (v20 or later)
+* Python (v3.11 or later)
 * PostgreSQL
-
-### Authentication
-
-* Clerk
-
-### Artificial Intelligence
-
-* LangChain
-* Google Gemini API
+* Git
 
 ---
 
-#  Architecture Overview
+### 1. Clone Repository
 
-Finova AI follows a modern layered architecture designed for scalability, maintainability, and performance.
+```bash
+git clone https://github.com/yourusername/finova-ai.git
 
-Frontend applications communicate securely with backend services, which process financial data, coordinate AI agents, and interact with the database. AI-powered insights are generated through LangChain orchestration and Gemini-powered reasoning.
-
-This architecture enables seamless integration between financial data management, analytics, and intelligent decision support systems.
+cd finova-ai
+```
 
 ---
 
-#  Security & Reliability
+### 2. Configure PostgreSQL
 
-Finova AI prioritizes user security and data protection through:
+Create a PostgreSQL database:
 
-* Secure Authentication
-* Protected API Access
+```sql
+CREATE DATABASE finova_ai;
+```
+
+---
+
+### 3. Backend Setup
+
+Navigate to backend directory:
+
+```bash
+cd backend
+```
+
+Create virtual environment:
+
+```bash
+python -m venv venv
+```
+
+Activate virtual environment:
+
+**Windows**
+
+```bash
+venv\Scripts\activate
+```
+
+**Linux / macOS**
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file:
+
+```env
+DATABASE_URL=postgresql://postgres:password@localhost:5432/finova_ai
+
+GEMINI_API_KEY=your_gemini_api_key
+
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+```
+
+Start backend server:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Backend server will run at:
+
+```text
+http://localhost:8000
+```
+
+---
+
+### 4. Frontend Setup
+
+Navigate to frontend directory:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+```
+
+Run development server:
+
+```bash
+npm run dev
+```
+
+Frontend will run at:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## 🔑 Required Services
+
+### Clerk Authentication
+
+1. Create a Clerk account.
+2. Create a new application.
+3. Copy the Publishable Key.
+4. Copy the Secret Key.
+5. Add them to environment variables.
+
+### Google Gemini API
+
+1. Create an API key using Google AI Studio.
+2. Add the API key to backend environment variables.
+
+---
+
+## 📖 Usage Guide
+
+### Step 1
+
+Create an account or sign in using Clerk authentication.
+
+### Step 2
+
+Add income and expense records.
+
+### Step 3
+
+Create monthly budgets.
+
+### Step 4
+
+Set financial goals.
+
+### Step 5
+
+Add recurring bills and due dates.
+
+### Step 6
+
+Visit the Analytics page to view:
+
+* Spending trends
+* Budget performance
+* Financial health score
+* AI-generated recommendations
+
+### Step 7
+
+Use the AI Assistant to ask questions such as:
+
+* How can I save more money?
+* Why did I overspend this month?
+* What investment options suit me?
+* How can I increase my income?
+
+---
+
+## 📊 Key AI Insights
+
+The analytics engine provides:
+
+* Spending behavior analysis
+* Overspending detection
+* Savings recommendations
+* Budget optimization
+* Investment guidance
+* Income growth suggestions
+* Financial health evaluation
+
+---
+
+## 🔒 Security Features
+
+* Clerk Authentication
+* Protected Routes
 * JWT Verification
-* Data Validation
 * Environment Variable Protection
-* Role-Based Access Control
-* Secure Backend Architecture
+* Secure API Communication
+* PostgreSQL Data Security
 
 ---
 
-#  Future Enhancements
+## 📈 Future Enhancements
 
-* Mobile Application
-* Voice-Based Financial Assistant
-* OCR Receipt Scanning
 * Bank Account Integration
+* OCR Receipt Scanning
+* Mobile Application
 * Multi-Currency Support
-* Real-Time Financial Alerts
-* Advanced Predictive Analytics
+* Voice Assistant
+* Investment Portfolio Tracking
+* Predictive Financial Forecasting
+* Email and SMS Notifications
 
 ---
 
-#  Academic Value
-
-This project demonstrates practical implementation of:
-
-* Artificial Intelligence
-* Multi-Agent Systems
-* Full Stack Development
-* Financial Analytics
-* Cloud Authentication
-* Intelligent Decision Support Systems
-* Data Visualization
-* Software Architecture Design
-
-making it highly suitable as a Final Year Software Engineering Project and an industry-level portfolio project.
-
----
-
-#  Author
+## 👨‍💻 Author
 
 **Viyashan**
 
-Software Engineer | Full Stack Developer
+Software Engineer
 
-Finova AI © 2026
+Portfolio: https://www.viyashan.me
+
+GitHub: https://github.com/yourusername
+
+LinkedIn: https://linkedin.com/in/yourprofile
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+Feel free to use, modify, and distribute this project in accordance with the license terms.
