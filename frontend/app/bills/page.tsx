@@ -1,36 +1,292 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import TopHeader from '@/components/TopHeader';
 
-const bills = [
-  { id: 1, name: 'Internet Bill', provider: 'Comcast Xfinity', amount: 59.99, dueDate: 'Aug 20', status: 'upcoming', icon: 'wifi', iconBg: 'bg-primary-bg', iconColor: 'text-primary' },
-  { id: 2, name: 'Electricity', provider: 'Con Edison', amount: 134.00, dueDate: 'Aug 22', status: 'upcoming', icon: 'bolt', iconBg: 'bg-warning-bg', iconColor: 'text-warning' },
-  { id: 3, name: 'Car Insurance', provider: 'Geico', amount: 120.00, dueDate: 'Aug 25', status: 'upcoming', icon: 'directions_car', iconBg: 'bg-accent-bg', iconColor: 'text-accent' },
-  { id: 4, name: 'Gym Membership', provider: 'Planet Fitness', amount: 45.00, dueDate: 'Aug 28', status: 'upcoming', icon: 'fitness_center', iconBg: 'bg-[#fdf4ff]', iconColor: 'text-[#a855f7]' },
-  { id: 5, name: 'Netflix', provider: 'Netflix Inc.', amount: 15.99, dueDate: 'Aug 14', status: 'paid', icon: 'subscriptions', iconBg: 'bg-error-bg', iconColor: 'text-error' },
-  { id: 6, name: 'Spotify', provider: 'Spotify AB', amount: 9.99, dueDate: 'Aug 10', status: 'paid', icon: 'music_note', iconBg: 'bg-success-bg', iconColor: 'text-success' },
-  { id: 7, name: 'Cloud Storage', provider: 'Google One', amount: 2.99, dueDate: 'Aug 5', status: 'paid', icon: 'cloud', iconBg: 'bg-primary-bg', iconColor: 'text-primary' },
-];
+interface Bill {
+  id: string;
+  name: string;
+  provider: string;
+  amount: number;
+  dueDate: string;
+  status: string;
+  icon: string;
+}
 
 export default function BillsPage() {
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [name, setName] = useState('');
+  const [provider, setProvider] = useState('');
+  const [amount, setAmount] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [icon, setIcon] = useState('receipt_long');
+
+  const fetchBills = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/bills');
+      if (res.ok) {
+        const data = await res.json();
+        setBills(data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch bills from backend. Using empty list fallback.', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchBills();
+  }, []);
+
+  const handleAddBill = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsedAmount = parseFloat(amount);
+    if (!name || isNaN(parsedAmount) || parsedAmount <= 0) return;
+
+    try {
+      const res = await fetch('http://localhost:8000/api/bills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          provider,
+          amount: parsedAmount,
+          dueDate: dueDate || 'Aug 25',
+          icon
+        }),
+      });
+      if (res.ok) {
+        const newBill = await res.json();
+        setBills((prev) => [...prev, newBill]);
+        setName('');
+        setProvider('');
+        setAmount('');
+        setDueDate('');
+        setShowAddForm(false);
+      }
+    } catch (err) {
+      console.error('Failed to add bill:', err);
+    }
+  };
+
+  const handleDeleteBill = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/bills/${id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setBills((prev) => prev.filter((b) => b.id !== id));
+      }
+    } catch (err) {
+      console.error('Failed to delete bill:', err);
+    }
+  };
+
+  const handlePayBill = async (id: string) => {
+    // Dynamically mark as paid locally for demo
+    setBills((prev) =>
+      prev.map((b) => (b.id === id ? { ...b, status: 'paid' } : b))
+    );
+  };
+
   const upcoming = bills.filter((b) => b.status === 'upcoming');
   const paid = bills.filter((b) => b.status === 'paid');
   const totalUpcoming = upcoming.reduce((sum, b) => sum + b.amount, 0);
+  const totalPaid = paid.reduce((sum, b) => sum + b.amount, 0);
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-white">
       <TopHeader />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1400px] mx-auto px-8 py-8">
 
           {/* Page Header */}
-          <div className="flex items-start justify-between mb-8 animate-fade-in-up">
+          <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-[28px] font-bold text-text-primary tracking-tight">Bills & Subscriptions</h1>
-              <p className="text-[15px] text-text-secondary mt-1">Manage upcoming payments and subscriptions</p>
+              <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Bills & Subscriptions</h1>
+              <p className="text-[14px] text-slate-500 mt-0.5 font-medium">Manage upcoming payments and subscriptions</p>
             </div>
-            <button className="h-10 px-4 flex items-center gap-2 bg-primary text-white rounded-xl text-[13px] font-semibold hover:bg-primary-dark transition-colors">
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="h-10 px-4 flex items-center gap-2 bg-sky-500 text-white rounded-xl text-[13px] font-bold hover:bg-sky-600 transition-all shadow-md shadow-sky-500/20 active:scale-95 cursor-pointer"
+            >
               <span className="material-symbols-outlined text-[18px]">add</span>
-              Add Bill
+              {showAddForm ? 'Cancel' : 'Add Bill'}
             </button>
           </div>
+
+          {/* Add Bill Form Card */}
+          {showAddForm && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-[0_10px_35px_rgba(59,130,246,0.04)] mb-8 animate-fade-in-up">
+              <h3 className="text-[16px] font-bold text-slate-900 mb-6">Add New Bill</h3>
+              <form onSubmit={handleAddBill} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Bill Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Netflix"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Provider</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Comcast"
+                    value={provider}
+                    onChange={(e) => setProvider(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Amount</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="text-[12px] font-bold text-slate-700 block mb-2">Due Date</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Aug 25"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full h-11 px-4 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/5 transition-all"
+                  />
+                </div>
+                <div className="md:col-span-4 flex justify-end">
+                  <button
+                    type="submit"
+                    className="h-11 px-6 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl text-[14px] font-bold shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[18px] font-bold">add</span>
+                    Create Bill
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Upcoming Total</p>
+              <h2 className="text-[28px] font-bold text-slate-900">Rs. {totalUpcoming.toFixed(2)}</h2>
+              <p className="text-[13px] text-slate-400 mt-2 font-medium">{upcoming.length} bills due this month</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Paid This Month</p>
+              <h2 className="text-[28px] font-bold text-emerald-500">Rs. {totalPaid.toFixed(2)}</h2>
+              <p className="text-[13px] text-slate-400 mt-2 font-medium">{paid.length} bills paid</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-2">Active Subscriptions</p>
+              <h2 className="text-[28px] font-bold text-slate-900">{bills.length}</h2>
+              <p className="text-[13px] text-slate-400 mt-2 font-medium">Rs. {(totalUpcoming + totalPaid).toFixed(2)}/month total</p>
+            </div>
+          </div>
+
+          {/* Upcoming Bills */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 bg-slate-50/20">
+              <h3 className="text-[16px] font-bold text-slate-900">Upcoming Bills</h3>
+              <span className="text-[11px] font-bold px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-lg uppercase tracking-wider">
+                {upcoming.length} Due
+              </span>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {upcoming.length > 0 ? (
+                upcoming.map((bill) => (
+                  <div key={bill.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[20px] text-sky-500">{bill.icon || 'receipt_long'}</span>
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-bold text-slate-800">{bill.name}</p>
+                        <p className="text-[12px] text-slate-400 mt-0.5 font-medium">{bill.provider} • Due {bill.dueDate}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[14px] font-bold text-slate-900">Rs. {bill.amount.toFixed(2)}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handlePayBill(bill.id)}
+                          className="h-8 px-3 text-[12px] font-bold bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white rounded-lg transition-all cursor-pointer"
+                        >
+                          Pay Now
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBill(bill.id)}
+                          className="w-8 h-8 rounded-lg hover:bg-rose-50 flex items-center justify-center text-rose-400 hover:text-rose-600 transition-colors cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-[13px] font-medium text-slate-400">
+                  No upcoming bills due.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Paid Bills */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 bg-slate-50/20">
+              <h3 className="text-[16px] font-bold text-slate-900">Paid</h3>
+              <span className="text-[11px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg uppercase tracking-wider">
+                Complete
+              </span>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {paid.length > 0 ? (
+                paid.map((bill) => (
+                  <div key={bill.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors opacity-75">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[20px] text-slate-400">{bill.icon || 'receipt_long'}</span>
+                      </div>
+                      <div>
+                        <p className="text-[14px] font-bold text-slate-800">{bill.name}</p>
+                        <p className="text-[12px] text-slate-400 mt-0.5 font-medium">{bill.provider} • Paid {bill.dueDate}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[14px] font-semibold text-slate-900">Rs. {bill.amount.toFixed(2)}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
+                        <button
+                          onClick={() => handleDeleteBill(bill.id)}
+                          className="w-8 h-8 rounded-lg hover:bg-rose-50 flex items-center justify-center text-rose-400 hover:text-rose-600 transition-colors cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-[13px] font-medium text-slate-400">
+                  No completed payments this month.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
