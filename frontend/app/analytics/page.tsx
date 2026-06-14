@@ -331,7 +331,35 @@ export default function AnalyticsPage() {
               )}
             </div>
 
-            
+            {/* Savings Planner Agent */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px] text-emerald-500">psychology</span>
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-bold text-slate-900">Savings Planner Agent</h3>
+                  <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Budget optimization</p>
+                </div>
+              </div>
+              {isAnalyzing ? (
+                <div className="flex items-center gap-3 py-4">
+                  <div className="w-5 h-5 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                  <span className="text-[13px] text-slate-500 font-medium">Planning savings...</span>
+                </div>
+              ) : agentSavings ? (
+                <p
+                  className="text-[14px] text-slate-600 font-medium leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{
+                    __html: agentSavings.summary.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                  }}
+                />
+              ) : (
+                <p className="text-[13px] text-slate-400 font-medium">Waiting for agent results...</p>
+              )}
+            </div>
+          </div>
 
           {/* Expense Analysis Agent Card */}
           <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-[0_12px_40px_rgba(59,130,246,0.04)] relative overflow-hidden">
