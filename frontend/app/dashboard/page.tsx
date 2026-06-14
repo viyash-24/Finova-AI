@@ -33,7 +33,8 @@ export default function DashboardPage() {
     cashFlow: []
   });
   const [totalIncome, setTotalIncome] = useState(0);
-  const [aiInsight, setAiInsight] = useState('No data available to generate insights.');
+  const [aiInsight, setAiInsight] = useState('Loading AI summary...');
+  const [aiRecommendations, setAiRecommendations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,18 +57,21 @@ export default function DashboardPage() {
         }
       } catch {}
 
+      // Dashboard Agent — quick summary from Expense Analysis + Savings Planner
       try {
-        const res = await fetch('http://localhost:8000/api/analytics/insights');
+        const res = await fetch('http://localhost:8000/api/ai/agent/dashboard');
         if (res.ok) {
-          const insights = await res.json();
-          if (insights.length > 0) {
-            // Find a relevant food or savings insight
-            const textInsight = insights[0].title + ': ' + insights[0].description;
-            setAiInsight(textInsight);
+          const agentData = await res.json();
+          if (agentData.summary) {
+            setAiInsight(agentData.summary);
+          }
+          if (agentData.recommendations && agentData.recommendations.length > 0) {
+            setAiRecommendations(agentData.recommendations);
           }
         }
       } catch (err) {
-        console.warn('Could not fetch AI insights from backend. Using static fallback.', err);
+        console.warn('Could not fetch AI dashboard summary.', err);
+        setAiInsight('AI agents are currently unavailable. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -333,19 +337,34 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h3 className="text-[16px] font-bold text-slate-900">AI Insights</h3>
-                    <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Personalized for you</p>
+                    <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Expense + Savings Agents</p>
                   </div>
                 </div>
 
-                {/* Insight block */}
+                {/* AI Summary */}
                 <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-5 mt-4">
-                  <p className="text-[14px] leading-relaxed text-slate-600 font-medium">
-                    {aiInsight}
-                  </p>
+                  <p
+                    className="text-[14px] leading-relaxed text-slate-600 font-medium whitespace-pre-line"
+                    dangerouslySetInnerHTML={{
+                      __html: aiInsight.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                    }}
+                  />
                 </div>
+
+                {/* Recommendations */}
+                {aiRecommendations.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {aiRecommendations.map((rec, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                        <span className="material-symbols-outlined text-sky-500 text-[16px] mt-0.5 shrink-0">tips_and_updates</span>
+                        <span>{rec}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Lovable signature block */}
+              {/* Signature block */}
               <div className="mt-8 pt-4 border-t border-slate-50 flex items-center justify-between text-slate-300">
                 <span className="text-[11px] font-semibold uppercase tracking-wider">Finova Intelligence v1.0</span>
                 <span className="material-symbols-outlined text-[16px] text-slate-300 animate-pulse">lock</span>
