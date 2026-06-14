@@ -37,11 +37,13 @@ const CATEGORIES = ['Housing', 'Food', 'Transport', 'Entertainment', 'Shopping',
 
 export default function AnalyticsPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [updatedTime, setUpdatedTime] = useState('5 minutes ago');
+  const [updatedTime, setUpdatedTime] = useState('loading...');
 
   const [monthsData, setMonthsData] = useState<MonthDataPoint[]>([]);
   const [insights, setInsights] = useState<AIInsightData[]>([]);
   const [expenseList, setExpenseList] = useState<Expense[]>([]);
+  const [agentExpense, setAgentExpense] = useState<{ summary: string; recommendations: string[] } | null>(null);
+  const [agentSavings, setAgentSavings] = useState<{ summary: string; recommendations: string[] } | null>(null);
 
   const fetchAnalyticsData = async () => {
     try {
@@ -63,18 +65,6 @@ export default function AnalyticsPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:8000/api/analytics/insights');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.length > 0) {
-          setInsights(data);
-        }
-      }
-    } catch (err) {
-      console.warn('Could not fetch AI insights from backend.', err);
-    }
-
-    try {
       const res = await fetch('http://localhost:8000/api/expenses');
       if (res.ok) {
         const data = await res.json();
@@ -85,27 +75,42 @@ export default function AnalyticsPage() {
     }
   };
 
-  useEffect(() => {
-    fetchAnalyticsData();
-  }, []);
-
-  // Triggers simulated AI analysis on backend
-  const handleTriggerAnalysis = async () => {
+  const fetchAgentInsights = async () => {
     setIsAnalyzing(true);
     try {
-      const res = await fetch('http://localhost:8000/api/analytics/insights/rerun', {
-        method: 'POST',
-      });
+      const res = await fetch('http://localhost:8000/api/ai/agent/analytics');
       if (res.ok) {
         const data = await res.json();
-        setInsights(data);
+        setAgentExpense(data.expense || null);
+        setAgentSavings(data.savings || null);
+
+        // Build insight cards from recommendations
+        const recs = data.recommendations || [];
+        const icons = ['auto_awesome', 'restaurant', 'local_taxi', 'savings', 'trending_up'];
+        const mapped: AIInsightData[] = recs.map((rec: string, idx: number) => ({
+          id: String(idx),
+          title: rec.length > 80 ? rec.substring(0, 77) + '...' : rec,
+          description: rec,
+          icon: icons[idx % icons.length],
+        }));
+        setInsights(mapped);
       }
     } catch (err) {
-      console.error('Failed to rerun insights on backend:', err);
+      console.warn('Could not fetch agent analytics.', err);
     } finally {
       setIsAnalyzing(false);
       setUpdatedTime('just now');
     }
+  };
+
+  useEffect(() => {
+    fetchAnalyticsData();
+    fetchAgentInsights();
+  }, []);
+
+  // Re-run triggers fresh agent analysis
+  const handleTriggerAnalysis = async () => {
+    await fetchAgentInsights();
   };
 
   // Group expenses by category
@@ -293,6 +298,67 @@ export default function AnalyticsPage() {
               )}
             </div>
 
+          </div>
+
+          {/* Agent Summaries */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Expense Analysis Agent */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px] text-sky-500">query_stats</span>
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-bold text-slate-900">Expense Analysis Agent</h3>
+                  <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Spending patterns</p>
+                </div>
+              </div>
+              {isAnalyzing ? (
+                <div className="flex items-center gap-3 py-4">
+                  <div className="w-5 h-5 border-2 border-sky-500/20 border-t-sky-500 rounded-full animate-spin"></div>
+                  <span className="text-[13px] text-slate-500 font-medium">Analyzing expenses...</span>
+                </div>
+              ) : agentExpense ? (
+                <p
+                  className="text-[14px] text-slate-600 font-medium leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{
+                    __html: agentExpense.summary.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                  }}
+                />
+              ) : (
+                <p className="text-[13px] text-slate-400 font-medium">Waiting for agent results...</p>
+              )}
+            </div>
+
+            {/* Savings Planner Agent */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px] text-emerald-500">psychology</span>
+                </div>
+                <div>
+                  <h3 className="text-[16px] font-bold text-slate-900">Savings Planner Agent</h3>
+                  <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Budget optimization</p>
+                </div>
+              </div>
+              {isAnalyzing ? (
+                <div className="flex items-center gap-3 py-4">
+                  <div className="w-5 h-5 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                  <span className="text-[13px] text-slate-500 font-medium">Planning savings...</span>
+                </div>
+              ) : agentSavings ? (
+                <p
+                  className="text-[14px] text-slate-600 font-medium leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{
+                    __html: agentSavings.summary.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                  }}
+                />
+              ) : (
+                <p className="text-[13px] text-slate-400 font-medium">Waiting for agent results...</p>
+              )}
+            </div>
           </div>
 
           {/* Expense Analysis Agent Card */}

@@ -6,26 +6,27 @@ from utils.json_parser import safe_agent_response
 
 logger = logging.getLogger("finova.agents")
 
-_ANALYZE_TEMPLATE = """You are an expert Income Growth AI.
-Based on the provided financial context (current income sources), generate a brief summary of the user's income diversity.
-Provide exactly 1-2 actionable recommendations for side hustles or income growth.
+_ANALYZE_TEMPLATE = """You are an expert Investment Suggestion AI.
+Based on the provided financial context, generate a brief summary of the user's investment readiness.
+Provide exactly 1-2 actionable investment recommendations or educational next steps.
+Note that these are not professional financial advice.
 
 You MUST respond with ONLY a valid JSON object — no markdown, no explanation, just JSON.
 The JSON must have exactly these two keys:
-- "summary": a string describing income diversity
+- "summary": a string describing investment readiness
 - "recommendations": an array of 1-2 short actionable strings
 
 Context: {context}"""
 
-_CHAT_TEMPLATE = """You are an expert Income Growth AI.
-Help the user identify ways to increase their income, suggest freelancing, recommend side hustles, and offer skill monetization ideas.
+_CHAT_TEMPLATE = """You are an expert Investment Suggestion AI.
+Help the user analyze their risk level, recommend beginner investments, and suggest growth opportunities.
 User Query: {query}
 Context Data: {context}
 
-Provide creative, practical, and personalized advice on how they can increase their earning potential based on their context."""
+Provide educational, risk-aware investment advice. Always include a disclaimer that this is not professional financial advice."""
 
 
-class IncomeGrowthAgent:
+class InvestmentSuggestionAgent:
     def __init__(self):
         self.llm = get_fast_llm()
         self.json_llm = get_json_llm()
@@ -37,15 +38,15 @@ class IncomeGrowthAgent:
             result = chain.invoke({"query": query, "context": str(context)})
             return extract_text(result.content)
         except Exception as e:
-            logger.error(f"IncomeGrowthAgent.process error: {e}")
-            return "I couldn't generate income growth ideas right now. Please try again."
+            logger.error(f"InvestmentSuggestionAgent.process error: {e}")
+            return "I couldn't analyze investment opportunities right now. Please try again."
 
     def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         prompt = PromptTemplate(template=_ANALYZE_TEMPLATE, input_variables=["context"])
         chain = prompt | self.json_llm
         try:
             result = chain.invoke({"context": str(context)})
-            return safe_agent_response(result.content, "Unable to analyze income.", "IncomeGrowthAgent")
+            return safe_agent_response(result.content, "Unable to analyze investments.", "InvestmentSuggestionAgent")
         except Exception as e:
-            logger.error(f"IncomeGrowthAgent.analyze error: {e}")
-            return {"summary": "Unable to analyze income.", "recommendations": []}
+            logger.error(f"InvestmentSuggestionAgent.analyze error: {e}")
+            return {"summary": "Unable to analyze investments.", "recommendations": []}

@@ -20,6 +20,8 @@ export default function GoalsPage() {
   const [current, setCurrent] = useState('');
   const [deadline, setDeadline] = useState('');
   const [icon, setIcon] = useState('shield');
+  const [aiAdvice, setAiAdvice] = useState<{ summary: string; recommendations: string[] } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const fetchGoals = async () => {
     try {
@@ -33,8 +35,24 @@ export default function GoalsPage() {
     }
   };
 
+  const fetchSavingsAgent = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch('http://localhost:8000/api/ai/agent/goals');
+      if (res.ok) {
+        const data = await res.json();
+        setAiAdvice(data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch savings agent advice.', err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchGoals();
+    fetchSavingsAgent();
   }, []);
 
   const handleAddGoal = async (e: React.FormEvent) => {
@@ -191,6 +209,47 @@ export default function GoalsPage() {
                 {goals.length > 0 ? 'Auto-transfers enabled' : 'Auto-transfers disabled'}
               </p>
             </div>
+          </div>
+
+          {/* Savings Planner Agent Card */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-8 relative overflow-hidden">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[20px] text-emerald-500">psychology</span>
+              </div>
+              <div>
+                <h3 className="text-[16px] font-bold text-slate-900">Savings Planner Agent</h3>
+                <p className="text-[12px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">AI-powered advice</p>
+              </div>
+            </div>
+            {aiLoading ? (
+              <div className="flex items-center gap-3 py-4">
+                <div className="w-5 h-5 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                <span className="text-[13px] text-slate-500 font-medium">Savings agent analyzing your goals...</span>
+              </div>
+            ) : aiAdvice ? (
+              <div>
+                <p
+                  className="text-[14px] text-slate-600 font-medium leading-relaxed whitespace-pre-line"
+                  dangerouslySetInnerHTML={{
+                    __html: aiAdvice.summary.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                  }}
+                />
+                {aiAdvice.recommendations && aiAdvice.recommendations.length > 0 && (
+                  <div className="mt-4 space-y-2 pt-4 border-t border-slate-100">
+                    {aiAdvice.recommendations.map((rec, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-[13px] text-slate-600 font-medium">
+                        <span className="material-symbols-outlined text-emerald-500 text-[16px] mt-0.5 shrink-0">tips_and_updates</span>
+                        <span>{rec}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-[13px] text-slate-400 font-medium">No AI advice available. Make sure the AI service is running.</p>
+            )}
           </div>
 
           {/* Goals Grid */}
