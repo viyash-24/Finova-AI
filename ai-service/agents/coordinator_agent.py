@@ -1,11 +1,12 @@
 from typing import Dict, Any
 from langchain_core.prompts import PromptTemplate
-from gemini.gemini_client import get_fast_llm
+from gemini.gemini_client import get_fast_llm, extract_text
+
 
 class CoordinatorAgent:
     def __init__(self):
         self.llm = get_fast_llm()
-        
+
     def determine_intent(self, query: str) -> str:
         """Determines which agent should handle the query."""
         prompt = PromptTemplate(
@@ -22,13 +23,12 @@ Query: {query}
 Category:""",
             input_variables=["query"]
         )
-        
+
         chain = prompt | self.llm
         try:
             result = chain.invoke({"query": query})
-            category = result.content.strip().lower()
-            
-            # Simple fallback matching if LLM returns extra text
+            category = extract_text(result.content).strip().lower()
+
             valid_categories = ["expense", "savings", "investment", "bills", "income", "general"]
             for valid in valid_categories:
                 if valid in category:
@@ -49,6 +49,7 @@ Response:""",
         )
         chain = prompt | self.llm
         try:
-            return chain.invoke({"query": query, "context": str(context)}).content
+            result = chain.invoke({"query": query, "context": str(context)})
+            return extract_text(result.content)
         except Exception:
             return "I'm having trouble processing that request right now."
