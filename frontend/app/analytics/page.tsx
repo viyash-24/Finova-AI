@@ -191,6 +191,18 @@ export default function AnalyticsPage() {
     });
   }, [categoryBreakdown]);
 
+  // Bar Chart Dynamic Scale
+  const maxCashFlow = monthsData.length > 0 
+    ? Math.max(...monthsData.map(d => Math.max(d.income, d.expenses))) 
+    : 8000;
+  const yMax = maxCashFlow > 0 ? maxCashFlow * 1.1 : 8000; // Add 10% headroom
+  const yLabels = [yMax, yMax * 0.75, yMax * 0.5, yMax * 0.25, 0];
+  const formatYLabel = (val: number) => {
+    if (val === 0) return '0';
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(1) + 'k';
+    return Math.round(val).toString();
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-white">
