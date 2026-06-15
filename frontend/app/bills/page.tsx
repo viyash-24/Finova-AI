@@ -36,13 +36,28 @@ export default function BillsPage() {
     }
   };
 
+  const SESSION_KEY = 'finova_bills_ai';
+
   const fetchBillAgent = async () => {
+    // Check sessionStorage first — only call Gemini if no cached result exists for this session
+    const cached = sessionStorage.getItem(SESSION_KEY);
+    if (cached) {
+      try {
+        setAiAdvice(JSON.parse(cached));
+        return;
+      } catch {}
+    }
+
     setAiLoading(true);
     try {
       const res = await fetch('http://localhost:8000/api/ai/agent/bills');
       if (res.ok) {
         const data = await res.json();
         setAiAdvice(data);
+        // Unconditionally cache results (even errors) to prevent hammering the API when quota is exhausted
+        if (data.summary) {
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+        }
       }
     } catch (err) {
       console.warn('Could not fetch bill reminder agent advice.', err);
