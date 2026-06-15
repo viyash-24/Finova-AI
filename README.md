@@ -299,7 +299,61 @@ http://localhost:8000
 
 ---
 
-### 4. Frontend Setup
+### 4. AI Service Setup
+
+Navigate to ai-service directory:
+
+```bash
+cd ai-service
+```
+
+Create virtual environment:
+
+```bash
+python -m venv venv
+```
+
+Activate virtual environment:
+
+**Windows**
+
+```bash
+venv\Scripts\activate
+```
+
+**Linux / macOS**
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+Start AI service server:
+
+```bash
+uvicorn main:app --reload --port 8001
+```
+
+AI service will run at:
+
+```text
+http://localhost:8001
+```
+
+---
+
+### 5. Frontend Setup
 
 Navigate to frontend directory:
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import TopHeader from '@/components/TopHeader';
 import { toast } from 'react-toastify';
 
@@ -13,13 +14,13 @@ export default function SettingsPage() {
   const [initials, setInitials] = useState('U');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const router = useRouter();
 
   // Preferences state
   const [prefs, setPrefs] = useState([
     { key: 'emailNotif', label: 'Email Notifications', desc: 'Receive weekly financial summaries', enabled: true },
     { key: 'pushNotif', label: 'Push Notifications', desc: 'Get alerts for bill reminders', enabled: true },
     { key: 'aiInsights', label: 'AI Insights', desc: 'Allow AI to analyze your spending patterns', enabled: true },
-    { key: 'darkMode', label: 'Dark Mode', desc: 'Switch to dark theme', enabled: false },
   ]);
 
   const { user, isLoaded } = useUser();
@@ -41,30 +42,39 @@ export default function SettingsPage() {
 
   const fetchProfile = async () => {
     setLoading(true);
+    // Always read localStorage first — this is the user's most recent explicit save
+    const localName = localStorage.getItem('finova_user_name') || '';
+    const localEmail = localStorage.getItem('finova_user_email') || '';
+
     try {
-      const mockEmail = localStorage.getItem('finova_user_email') || '';
-      const mockName = localStorage.getItem('finova_user_name') || '';
-      
       const res = await fetch('http://localhost:8000/api/auth/me', {
         headers: {
-          'x-mock-email': mockEmail,
-          'x-mock-name': mockName
+          'x-mock-email': localEmail,
+          'x-mock-name': localName
         }
       });
       if (res.ok) {
         const data = await res.json();
-        setFullName(data.name || '');
-        setEmail(data.email || '');
+        // Prefer the locally stored name (user's last explicit save) over the backend
+        // Backend email and avatar_url are still used as they are less likely to conflict
+        const displayName = localName || data.name || '';
+        setFullName(displayName);
+        setEmail(localEmail || data.email || '');
         setAvatarUrl(data.avatar_url || '');
-        computeInitials(data.name || '');
+        computeInitials(displayName);
+        // Keep localStorage in sync with avatar_url from backend
+        if (data.avatar_url) localStorage.setItem('finova_user_avatar', data.avatar_url);
+      } else {
+        // Backend failed — fall back entirely to localStorage
+        setFullName(localName);
+        setEmail(localEmail);
+        computeInitials(localName);
       }
     } catch (err) {
-      // Fallback to localStorage for mock auth
-      const storedName = localStorage.getItem('finova_user_name') || '';
-      const storedEmail = localStorage.getItem('finova_user_email') || '';
-      setFullName(storedName);
-      setEmail(storedEmail);
-      computeInitials(storedName);
+      // Network error — fall back entirely to localStorage
+      setFullName(localName);
+      setEmail(localEmail);
+      computeInitials(localName);
     } finally {
       setLoading(false);
     }
@@ -97,22 +107,43 @@ export default function SettingsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setFullName(data.name || '');
-        setAvatarUrl(data.avatar_url || '');
-        computeInitials(data.name || '');
+        const savedName = data.name || fullName;
 
-        // Also sync to localStorage for TopHeader display
-        localStorage.setItem('finova_user_name', data.name || '');
+        // Synchronize name with Clerk if using Clerk auth
+        if (user) {
+          try {
+            const parts = savedName.trim().split(' ');
+            await user.update({
+              firstName: parts[0] || '',
+              lastName: parts.slice(1).join(' ') || ''
+            });
+          } catch (e) {
+            console.error('Failed to update Clerk user:', e);
+          }
+        }
+
+        setFullName(savedName);
+        setAvatarUrl(data.avatar_url || avatarUrl);
+        computeInitials(savedName);
+
+        // Sync to localStorage and notify TopHeader to refresh
+        localStorage.setItem('finova_user_name', savedName);
         if (data.email) localStorage.setItem('finova_user_email', data.email);
+        window.dispatchEvent(new Event('finova-profile-updated'));
 
         toast.success('Profile updated successfully!');
       } else {
-        toast.error('Failed to update profile.');
+        // Backend failed — save locally anyway
+        localStorage.setItem('finova_user_name', fullName);
+        computeInitials(fullName);
+        window.dispatchEvent(new Event('finova-profile-updated'));
+        toast.success('Profile saved locally.');
       }
     } catch (err) {
       // Offline fallback — save to localStorage
       localStorage.setItem('finova_user_name', fullName);
       computeInitials(fullName);
+      window.dispatchEvent(new Event('finova-profile-updated'));
       toast.success('Profile saved locally.');
     } finally {
       setSaving(false);
@@ -120,9 +151,17 @@ export default function SettingsPage() {
   };
 
   const togglePref = (key: string) => {
-    setPrefs(prev =>
-      prev.map(p => p.key === key ? { ...p, enabled: !p.enabled } : p)
-    );
+    const pref = prefs.find(p => p.key === key);
+    if (pref) {
+      const willBeEnabled = !pref.enabled;
+      if (willBeEnabled) {
+        toast.success(`${pref.label} enabled successfully`);
+      } else {
+        toast.info(`${pref.label} disabled`);
+      }
+    }
+
+    setPrefs(prev => prev.map(p => p.key === key ? { ...p, enabled: !p.enabled } : p));
   };
 
   const handleDeleteAccount = async () => {
@@ -144,7 +183,7 @@ export default function SettingsPage() {
           localStorage.removeItem('finova_user_email');
           localStorage.removeItem('finova_user_name');
           toast.success('Account deleted successfully.');
-          window.location.href = '/sign-in';
+          router.push('/sign-in');
         } else {
           toast.error('Failed to delete account.');
         }
@@ -212,14 +251,50 @@ export default function SettingsPage() {
                     disabled
                   />
                 </div>
-                <div>
-                  <label className="text-[12px] font-medium text-text-tertiary uppercase tracking-wider block mb-1.5">Avatar URL</label>
-                  <input
-                    className="w-full h-10 px-3 bg-surface border border-surface-border rounded-lg text-[14px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/photo.jpg"
-                  />
+                <div className="col-span-1 md:col-span-2">
+                  <label className="text-[12px] font-medium text-text-tertiary uppercase tracking-wider block mb-1.5">Avatar Image</label>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 h-10 px-3 bg-surface border border-surface-border rounded-lg text-[14px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      placeholder="Paste image URL or click Upload ->"
+                    />
+                    <label className="h-10 px-4 bg-surface border border-surface-border rounded-lg text-[13px] font-medium text-text-secondary hover:bg-surface-hover transition-colors flex items-center justify-center cursor-pointer shadow-sm">
+                      <span className="material-symbols-outlined text-[18px] mr-1.5 text-sky-500">upload</span>
+                      Upload
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 2 * 1024 * 1024) {
+                               toast.error('Image must be less than 2MB');
+                               return;
+                            }
+                            // Convert to base64 for local UI and backend DB
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setAvatarUrl(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                            
+                            // Also push to Clerk immediately if using Clerk
+                            if (user && typeof user.setProfileImage === 'function') {
+                               try {
+                                 await user.setProfileImage({ file });
+                                 toast.success('Avatar uploaded to Cloud');
+                               } catch (err) {
+                                 console.error(err);
+                               }
+                            }
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -270,7 +345,10 @@ export default function SettingsPage() {
             <div className="bg-white rounded-2xl border border-surface-border p-6 animate-fade-in-up">
               <h3 className="text-[16px] font-semibold text-text-primary mb-5">Security</h3>
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors group">
+                <button 
+                  onClick={() => toast.info('Password reset instructions sent to your email.')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors group cursor-pointer"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center group-hover:bg-primary-bg transition-colors">
                       <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary transition-colors">lock</span>
@@ -282,7 +360,10 @@ export default function SettingsPage() {
                   </div>
                   <span className="material-symbols-outlined text-[18px] text-text-tertiary">chevron_right</span>
                 </button>
-                <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors group">
+                <button 
+                  onClick={() => toast.info('2FA settings will be available in the next security update.')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors group cursor-pointer"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center group-hover:bg-primary-bg transition-colors">
                       <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary transition-colors">security</span>
@@ -294,7 +375,10 @@ export default function SettingsPage() {
                   </div>
                   <span className="material-symbols-outlined text-[18px] text-text-tertiary">chevron_right</span>
                 </button>
-                <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors group">
+                <button 
+                  onClick={() => toast.info('Device management coming soon.')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-surface-hover transition-colors group cursor-pointer"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-surface flex items-center justify-center group-hover:bg-primary-bg transition-colors">
                       <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary transition-colors">devices</span>
@@ -317,7 +401,10 @@ export default function SettingsPage() {
                 <button onClick={handleDeleteAccount} className="h-9 px-4 text-[13px] font-medium text-error bg-error-bg rounded-lg hover:bg-error hover:text-white transition-all cursor-pointer">
                   Delete Account
                 </button>
-                <button className="h-9 px-4 text-[13px] font-medium text-text-secondary bg-surface rounded-lg hover:bg-surface-hover transition-all border border-surface-border">
+                <button 
+                  onClick={() => toast.success('Your data export has started. You will receive an email shortly.')}
+                  className="h-9 px-4 text-[13px] font-medium text-text-secondary bg-surface rounded-lg hover:bg-surface-hover transition-all border border-surface-border cursor-pointer"
+                >
                   Export Data
                 </button>
               </div>

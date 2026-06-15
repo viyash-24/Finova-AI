@@ -53,9 +53,8 @@ export default function AnalyticsPage() {
         if (d.cashFlow && d.cashFlow.length > 0) {
           const mapped = d.cashFlow.map((item: any) => ({
             label: item.month,
-            // Map values to percentage height
-            income: (item.income / 8000) * 80,
-            expenses: (item.expenses / 8000) * 80,
+            income: item.income,
+            expenses: item.expenses,
           }));
           setMonthsData(mapped);
         }
@@ -75,7 +74,31 @@ export default function AnalyticsPage() {
     }
   };
 
-  const fetchAgentInsights = async () => {
+  const SESSION_KEY = 'finova_analytics_ai';
+
+  const fetchAgentInsights = async (bypassCache = false) => {
+    // Check sessionStorage cache first — skip Gemini call if data already exists for this session
+    if (!bypassCache) {
+      const cached = sessionStorage.getItem(SESSION_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setAgentExpense(parsed.expense || null);
+          setAgentSavings(parsed.savings || null);
+          const recs = parsed.recommendations || [];
+          const icons = ['auto_awesome', 'restaurant', 'local_taxi', 'savings', 'trending_up'];
+          setInsights(recs.map((rec: string, idx: number) => ({
+            id: String(idx),
+            title: rec.length > 80 ? rec.substring(0, 77) + '...' : rec,
+            description: rec,
+            icon: icons[idx % icons.length],
+          })));
+          setUpdatedTime('cached');
+          return;
+        } catch {}
+      }
+    }
+
     setIsAnalyzing(true);
     try {
       const res = await fetch('http://localhost:8000/api/ai/agent/analytics');
@@ -94,6 +117,11 @@ export default function AnalyticsPage() {
           icon: icons[idx % icons.length],
         }));
         setInsights(mapped);
+
+        // Unconditionally cache results (even errors) to prevent hammering the API when quota is exhausted
+        if (data.expense?.summary) {
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+        }
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
@@ -108,9 +136,10 @@ export default function AnalyticsPage() {
     fetchAgentInsights();
   }, []);
 
-  // Re-run triggers fresh agent analysis
+  // Re-run clears the session cache and forces a fresh Gemini analysis
   const handleTriggerAnalysis = async () => {
-    await fetchAgentInsights();
+    sessionStorage.removeItem(SESSION_KEY);
+    await fetchAgentInsights(true);
   };
 
   // Group expenses by category
@@ -143,10 +172,11 @@ export default function AnalyticsPage() {
     if (grandTotal === 0) return [];
     
     let accumulatedLength = 0;
+    const circumference = 2 * Math.PI * 70; // ~439.82
     return CATEGORIES.map((cat) => {
       const amount = totals[cat] || 0;
       const pct = amount / grandTotal;
-      const strokeLength = pct * 377;
+      const strokeLength = pct * circumference;
       const offset = -accumulatedLength;
       accumulatedLength += strokeLength;
       
@@ -160,6 +190,19 @@ export default function AnalyticsPage() {
       };
     });
   }, [categoryBreakdown]);
+
+  // Bar Chart Dynamic Scale
+  const maxCashFlow = monthsData.length > 0 
+    ? Math.max(...monthsData.map(d => Math.max(d.income, d.expenses))) 
+    : 8000;
+  const yMax = maxCashFlow > 0 ? maxCashFlow * 1.1 : 8000; // Add 10% headroom
+  const yLabels = [yMax, yMax * 0.75, yMax * 0.5, yMax * 0.25, 0];
+  const formatYLabel = (val: number) => {
+    if (val === 0) return '0';
+    if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+    if (val >= 1000) return (val / 1000).toFixed(1) + 'k';
+    return Math.round(val).toString();
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50/20 via-slate-50 to-white">
@@ -190,41 +233,44 @@ export default function AnalyticsPage() {
               <div className="mt-8 relative h-[280px]">
                 {/* Horizontal dotted grid lines */}
                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8">
-                  {[8000, 6000, 4000, 2000, 0].map((val) => (
-                    <div key={val} className="flex items-center w-full">
-                      <span className="text-[11px] font-bold text-slate-400 w-10 text-left">{val}</span>
+                  {yLabels.map((val, idx) => (
+                    <div key={idx} className="flex items-center w-full">
+                      <span className="text-[11px] font-bold text-slate-400 w-10 text-left">{formatYLabel(val)}</span>
                       <div className="flex-1 border-t border-dashed border-slate-200/80"></div>
                     </div>
                   ))}
                 </div>
 
-                {/* SVG Bars Container */}
-                <div className="absolute left-10 right-0 top-0 bottom-8">
-                  <div className="w-full h-full flex justify-between items-end px-2">
-                    {monthsData.map((d) => (
-                      <div key={d.label} className="flex flex-col items-center h-full justify-end flex-1 max-w-[50px] mx-1">
-                        <div className="flex items-end gap-1.5 h-full w-full justify-center">
-                          {/* Income Bar (Green) */}
-                          <div
-                            className="bg-[#10b981] w-[14px] rounded-t-full transition-all duration-500 hover:opacity-90"
-                            style={{ height: `${d.income}%` }}
-                          ></div>
+                {/* Bars & Labels Container */}
+                <div className="absolute left-10 right-0 top-0 bottom-0 flex justify-between items-end px-4">
+                  {monthsData.map((d) => {
+                    const incomeHeight = yMax > 0 ? (d.income / yMax) * 100 : 0;
+                    const expensesHeight = yMax > 0 ? (d.expenses / yMax) * 100 : 0;
+                    return (
+                      <div key={d.label} className="flex flex-col items-center h-full justify-end flex-1">
+                        <div className="flex items-end gap-1.5 h-[calc(100%-2rem)] w-full justify-center">
                           {/* Expenses Bar (Blue) */}
                           <div
-                            className="bg-sky-500 w-[14px] rounded-t-full transition-all duration-500 hover:opacity-90"
-                            style={{ height: `${d.expenses}%` }}
-                          ></div>
+                            className="bg-sky-500 w-[14px] sm:w-[18px] rounded-t-md transition-all duration-500 hover:opacity-90 relative group cursor-pointer"
+                            style={{ height: `${expensesHeight}%` }}
+                          >
+                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded whitespace-nowrap z-10 transition-opacity pointer-events-none">Rs. {d.expenses.toLocaleString()}</div>
+                          </div>
+                          {/* Income Bar (Green) */}
+                          <div
+                            className="bg-[#10b981] w-[14px] sm:w-[18px] rounded-t-md transition-all duration-500 hover:opacity-90 relative group cursor-pointer"
+                            style={{ height: `${incomeHeight}%` }}
+                          >
+                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded whitespace-nowrap z-10 transition-opacity pointer-events-none">Rs. {d.income.toLocaleString()}</div>
+                          </div>
+                        </div>
+                        {/* X-Axis label perfectly aligned below the bars */}
+                        <div className="h-8 flex items-end">
+                          <span className="text-[12px] font-bold text-slate-400 text-center">{d.label}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* X-Axis labels */}
-                <div className="absolute bottom-0 left-10 right-0 flex justify-between px-6">
-                  {monthsData.map((d) => (
-                    <span key={d.label} className="text-[12px] font-bold text-slate-400 w-[24px] text-center">{d.label}</span>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -252,8 +298,17 @@ export default function AnalyticsPage() {
                 <>
                   {/* Donut Chart SVG */}
                   <div className="flex justify-center items-center my-6 h-[280px]">
-                    <div className="relative w-56 h-56">
-                      <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                    <div className="relative w-[220px] h-[220px]">
+                      {/* Outer glow/shadow */}
+                      <div className="absolute inset-0 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.05)]"></div>
+                      
+                      {/* Background track */}
+                      <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full transform -rotate-90">
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="#f1f5f9" strokeWidth="24" />
+                      </svg>
+                      
+                      {/* Value rings */}
+                      <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full transform -rotate-90 z-10 drop-shadow-md">
                         {segments.map((seg) => {
                           if (seg.strokeLength === 0) return null;
                           return (
@@ -261,17 +316,26 @@ export default function AnalyticsPage() {
                               key={seg.category}
                               cx="100"
                               cy="100"
-                              r="60"
+                              r="70"
                               fill="none"
                               stroke={seg.color}
                               strokeWidth="24"
-                              strokeDasharray={`${seg.strokeLength} 377`}
+                              strokeDasharray={`${seg.strokeLength} 440`}
                               strokeDashoffset={seg.offset}
-                              className="transition-all duration-500 hover:opacity-90"
+                              strokeLinecap="round"
+                              className="transition-all duration-1000 ease-out hover:opacity-80 hover:stroke-[28px] cursor-pointer"
                             />
                           );
                         })}
                       </svg>
+                      
+                      {/* Center summary text */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Total</span>
+                        <span className="text-[18px] font-bold text-slate-800">
+                          Rs. {categoryBreakdown.grandTotal >= 1000 ? (categoryBreakdown.grandTotal/1000).toFixed(1) + 'k' : categoryBreakdown.grandTotal}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

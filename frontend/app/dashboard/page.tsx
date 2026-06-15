@@ -57,16 +57,21 @@ export default function DashboardPage() {
         }
       } catch {}
 
-      // Dashboard Agent — quick summary from Expense Analysis + Savings Planner
+      // Dashboard Agent — check sessionStorage cache first to avoid burning Gemini quota on every refresh
+      const SESSION_KEY = 'finova_dashboard_ai';
       try {
-        const res = await fetch('http://localhost:8000/api/ai/agent/dashboard');
-        if (res.ok) {
-          const agentData = await res.json();
-          if (agentData.summary) {
+        const cached = sessionStorage.getItem(SESSION_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.summary) setAiInsight(parsed.summary);
+          if (parsed.recommendations?.length > 0) setAiRecommendations(parsed.recommendations);
+        } else {
+          const res = await fetch('http://localhost:8000/api/ai/agent/dashboard');
+          if (res.ok) {
+            const agentData = await res.json();
             setAiInsight(agentData.summary);
-          }
-          if (agentData.recommendations && agentData.recommendations.length > 0) {
-            setAiRecommendations(agentData.recommendations);
+            setAiRecommendations(agentData.recommendations || []);
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(agentData));
           }
         }
       } catch (err) {
