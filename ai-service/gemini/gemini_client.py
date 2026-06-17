@@ -1,5 +1,10 @@
 import os
+import time
+import logging
+from typing import Any, Dict, Optional
 from langchain_google_genai import ChatGoogleGenerativeAI
+
+logger = logging.getLogger("finova.agents")
 
 
 def _get_api_key() -> str:
@@ -32,41 +37,3 @@ def extract_text(content) -> str:
         return "".join(parts)
     return str(content)
 
-
-# ─────────────────────────────────────────────────────
-#  Three different model names → three separate quotas
-#  Each free-tier model gets its own 20 RPM allowance.
-# ─────────────────────────────────────────────────────
-
-def get_llm():
-    """Primary LLM"""
-    return ChatGoogleGenerativeAI(
-        model="gemini-flash-latest",
-        temperature=0.7,
-        google_api_key=_get_api_key(),
-        max_output_tokens=2048,
-        max_retries=1,
-    )
-
-
-def get_fast_llm():
-    """Fast LLM for routing & chat"""
-    return ChatGoogleGenerativeAI(
-        model="gemini-flash-latest",
-        temperature=0.3,
-        google_api_key=_get_api_key(),
-        max_output_tokens=1024,
-        max_retries=1,
-    )
-
-
-def get_json_llm():
-    """JSON-focused LLM for analyze() calls"""
-    return ChatGoogleGenerativeAI(
-        model="gemini-flash-latest",
-        temperature=0.1,
-        google_api_key=_get_api_key(),
-        max_output_tokens=1024,
-        max_retries=2,
-        model_kwargs={"response_mime_type": "application/json"}
-    )
