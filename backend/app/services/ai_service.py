@@ -6,21 +6,33 @@ from app.core.config import settings
 logger = logging.getLogger("finova")
 
 # Generous timeout — Gemini can be slow, analyze runs 5 agents in parallel
-_TIMEOUT = 90.0
+_TIMEOUT = httpx.Timeout(connect=5.0, read=90.0, write=10.0, pool=5.0)
+
+# Persistent connection pool — avoids TCP handshake overhead on every call
+_http_client: httpx.AsyncClient | None = None
+
+
+def _get_client() -> httpx.AsyncClient:
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(
+            timeout=_TIMEOUT,
+            limits=httpx.Limits(max_keepalive_connections=10, max_connections=20),
+        )
+    return _http_client
 
 
 class AIService:
     @staticmethod
     async def chat(query: str, context: Dict[str, Any] = {}):
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{settings.AI_SERVICE_URL}/chat",
-                    json={"query": query, "context": context},
-                    timeout=_TIMEOUT
-                )
-                response.raise_for_status()
-                return response.json()
+            client = _get_client()
+            response = await client.post(
+                f"{settings.AI_SERVICE_URL}/chat",
+                json={"query": query, "context": context},
+            )
+            response.raise_for_status()
+            return response.json()
         except Exception as e:
             logger.error(f"AI service chat error: {e} | URL: {settings.AI_SERVICE_URL}")
             return {
@@ -31,14 +43,13 @@ class AIService:
     @staticmethod
     async def analyze(query: str, context: Dict[str, Any] = {}):
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{settings.AI_SERVICE_URL}/analyze",
-                    json={"query": query, "context": context},
-                    timeout=_TIMEOUT
-                )
-                response.raise_for_status()
-                return response.json()
+            client = _get_client()
+            response = await client.post(
+                f"{settings.AI_SERVICE_URL}/analyze",
+                json={"query": query, "context": context},
+            )
+            response.raise_for_status()
+            return response.json()
         except Exception as e:
             logger.error(f"AI service analyze error: {e} | URL: {settings.AI_SERVICE_URL}")
             return {
@@ -50,14 +61,13 @@ class AIService:
     async def _call_agent(endpoint: str, context: Dict[str, Any], fallback_summary: str) -> Dict[str, Any]:
         """Generic helper to call a specific agent endpoint on the AI microservice."""
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{settings.AI_SERVICE_URL}/agent/{endpoint}",
-                    json={"context": context},
-                    timeout=_TIMEOUT
-                )
-                response.raise_for_status()
-                return response.json()
+            client = _get_client()
+            response = await client.post(
+                f"{settings.AI_SERVICE_URL}/agent/{endpoint}",
+                json={"context": context},
+            )
+            response.raise_for_status()
+            return response.json()
         except Exception as e:
             logger.error(f"AI agent/{endpoint} error: {e}")
             return {"summary": fallback_summary, "recommendations": []}
