@@ -132,11 +132,14 @@ async def ai_analytics_insights(
     current_user: User = Depends(get_current_user),
 ):
     """Analytics — Expense Analysis Agent + Savings Planner Agent."""
+    import asyncio
     context = await _build_financial_context(db, current_user)
 
-    # Run SEQUENTIALLY to avoid simultaneous rate-limit hits
-    expense_result = await AIService.agent_expense(context)
-    savings_result = await AIService.agent_savings(context)
+    # Run BOTH agents in PARALLEL
+    expense_result, savings_result = await asyncio.gather(
+        AIService.agent_expense(context),
+        AIService.agent_savings(context),
+    )
 
     recommendations = (
         expense_result.get("recommendations", []) +
