@@ -63,3 +63,24 @@ export function clearAiCache(userId: string, cacheKey: string): void {
     localStorage.removeItem(storageKey(userId, cacheKey));
   } catch {}
 }
+
+/**
+ * Determine whether a fresh AI call is needed.
+ *
+ * Returns true when:
+ *  - There is no cached entry for this user (first login / first visit)
+ *  - The income count changed since the last analysis
+ *  - The expense count changed since the last analysis
+ */
+export function needsAiRefresh(
+  userId: string,
+  cacheKey: string,
+  currentIncomeCount: number,
+  currentExpenseCount: number,
+): boolean {
+  const entry = readAiCache(userId, cacheKey);
+  if (!entry) return true;  // No cache — first time
+  if (entry.incomeCount !== currentIncomeCount) return true;
+  if (entry.expenseCount !== currentExpenseCount) return true;
+  return false;
+}
