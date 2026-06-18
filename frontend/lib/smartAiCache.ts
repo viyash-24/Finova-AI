@@ -36,3 +36,15 @@ export function readAiCache(userId: string, cacheKey: string): AiCacheEntry | nu
     return null;
   }
 }
+
+/**
+ * Write an AI result to the cache.
+ */
+export function writeAiCache(
+  userId: string,
+  cacheKey: string,
+  data: unknown,
+  incomeCount: number,
+  expenseCount: number,
+): void {
+  
