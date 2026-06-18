@@ -47,7 +47,13 @@ class InvestmentSuggestionAgent:
     def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         prompt = PromptTemplate(template=_ANALYZE_TEMPLATE, input_variables=["context"])
         try:
-            
+            result = call_with_fallback(
+                prompt,
+                {"context": str(context)},
+                temperature=0.1,
+                max_output_tokens=512,
+                json_mode=True,
+            )
             return safe_agent_response(result.content, "Unable to analyze investments.", "InvestmentSuggestionAgent")
         except Exception as e:
             logger.error(f"InvestmentSuggestionAgent.analyze error: {e}")
