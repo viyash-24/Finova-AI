@@ -50,3 +50,13 @@ _FALLBACK_MODELS = [
     "gemini-1.5-flash",
     "gemini-1.5-flash-8b",
 ]
+
+# Keywords that indicate a quota / rate-limit error (case-insensitive check)
+_RATE_LIMIT_SIGNALS = [
+    "quota",
+    "rate limit",
+    "resource_exhausted",
+    "429",
+    "too many requests",
+    "rateLimitExceeded",
+]
