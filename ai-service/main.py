@@ -53,7 +53,8 @@ bill_agent = BillReminderAgent()
 income_agent = IncomeGrowthAgent()
 
 # Thread pool for running sync LangChain calls without blocking the event loop
-_executor = ThreadPoolExecutor(max_workers=4)
+# Use more workers so parallel agent calls don't queue up
+_executor = ThreadPoolExecutor(max_workers=10)
 
 
 def _run_in_thread(fn, *args):
@@ -67,7 +68,7 @@ def _run_in_thread(fn, *args):
 #  Prevents repeated page refreshes from burning API quota.
 # ─────────────────────────────────────────────────────
 _cache: Dict[str, Dict[str, Any]] = {}
-CACHE_TTL_SECONDS = 300  # 5 minutes
+CACHE_TTL_SECONDS = 1800  # 30 minutes — financial data changes infrequently
 
 
 def _cache_key(prefix: str, data: Any) -> str:
@@ -90,7 +91,7 @@ def _cache_set(key: str, value: Any) -> None:
     """Store a value in the cache."""
     _cache[key] = {"ts": time.time(), "value": value}
     # Evict old entries if cache grows too large
-    if len(_cache) > 100:
+    if len(_cache) > 500:
         oldest_key = min(_cache, key=lambda k: _cache[k]["ts"])
         del _cache[oldest_key]
 
@@ -131,16 +132,21 @@ async def analyze_endpoint(request: AnalyzeRequest):
         return cached
 
     try:
-        # Run agents SEQUENTIALLY with small delays to respect rate limits
-        expense_analysis = await _run_in_thread(expense_agent.analyze, request.context)
-        await asyncio.sleep(2)
-        savings_analysis = await _run_in_thread(savings_agent.analyze, request.context)
-        await asyncio.sleep(2)
-        investment_analysis = await _run_in_thread(investment_agent.analyze, request.context)
-        await asyncio.sleep(2)
-        bill_analysis = await _run_in_thread(bill_agent.analyze, request.context)
-        await asyncio.sleep(2)
-        income_analysis = await _run_in_thread(income_agent.analyze, request.context)
+        # Run ALL agents in PARALLEL — eliminates 8+ s of sequential delays
+        (
+            expense_analysis,
+            savings_analysis,
+            investment_analysis,
+            bill_analysis,
+            income_analysis,
+        ) = await asyncio.gather(
+            _run_in_thread(expense_agent.analyze, request.context),
+            _run_in_thread(savings_agent.analyze, request.context),
+            _run_in_thread(investment_agent.analyze, request.context),
+            _run_in_thread(bill_agent.analyze, request.context),
+            _run_in_thread(income_agent.analyze, request.context),
+            return_exceptions=False,
+        )
 
         # Aggregate recommendations
         recommendations = (
@@ -230,10 +236,11 @@ async def dashboard_summary_endpoint(request: AnalyzeRequest):
     if cached:
         return cached
     try:
-        # Run SEQUENTIALLY with a delay between calls
-        expense_analysis = await _run_in_thread(expense_agent.analyze, request.context)
-        await asyncio.sleep(3)
-        savings_analysis = await _run_in_thread(savings_agent.analyze, request.context)
+        # Run BOTH agents in PARALLEL — saves the 3 s sequential sleep
+        expense_analysis, savings_analysis = await asyncio.gather(
+            _run_in_thread(expense_agent.analyze, request.context),
+            _run_in_thread(savings_agent.analyze, request.context),
+        )
 
         recommendations = (
             expense_analysis.get("recommendations", []) +
@@ -249,10 +256,10 @@ async def dashboard_summary_endpoint(request: AnalyzeRequest):
             "summary": summary,
             "recommendations": recommendations[:3]
         }
-        
+
         if "Unable to analyze" not in expense_analysis.get("summary", "") and "Unable to analyze" not in savings_analysis.get("summary", ""):
             _cache_set(ck, result)
-            
+
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import logging
 from langchain_core.prompts import PromptTemplate
-from gemini.gemini_client import get_fast_llm, get_json_llm, extract_text
+from gemini.gemini_client import call_with_fallback, get_fast_llm, extract_text
 from utils.json_parser import safe_agent_response
 
 logger = logging.getLogger("finova.agents")
@@ -28,13 +28,16 @@ Provide a helpful summary of upcoming due dates, highlight any overdue bills, an
 class BillReminderAgent:
     def __init__(self):
         self.llm = get_fast_llm()
-        self.json_llm = get_json_llm()
 
     def process(self, query: str, context: Dict[str, Any]) -> str:
         prompt = PromptTemplate(template=_CHAT_TEMPLATE, input_variables=["query", "context"])
-        chain = prompt | self.llm
         try:
-            result = chain.invoke({"query": query, "context": str(context)})
+            result = call_with_fallback(
+                prompt,
+                {"query": query, "context": str(context)},
+                temperature=0.3,
+                max_output_tokens=1024,
+            )
             return extract_text(result.content)
         except Exception as e:
             logger.error(f"BillReminderAgent.process error: {e}")
@@ -42,9 +45,14 @@ class BillReminderAgent:
 
     def analyze(self, context: Dict[str, Any]) -> Dict[str, Any]:
         prompt = PromptTemplate(template=_ANALYZE_TEMPLATE, input_variables=["context"])
-        chain = prompt | self.json_llm
         try:
-            result = chain.invoke({"context": str(context)})
+            result = call_with_fallback(
+                prompt,
+                {"context": str(context)},
+                temperature=0.1,
+                max_output_tokens=512,
+                json_mode=True,
+            )
             return safe_agent_response(result.content, "Unable to analyze bills.", "BillReminderAgent")
         except Exception as e:
             logger.error(f"BillReminderAgent.analyze error: {e}")
