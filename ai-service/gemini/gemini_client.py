@@ -60,3 +60,10 @@ _RATE_LIMIT_SIGNALS = [
     "too many requests",
     "rateLimitExceeded",
 ]
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    """Return True if the exception looks like a quota/rate-limit error."""
+    msg = str(exc).lower()
+    return any(signal.lower() in msg for signal in _RATE_LIMIT_SIGNALS)
+
