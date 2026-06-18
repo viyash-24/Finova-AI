@@ -18,3 +18,12 @@ export interface AiCacheEntry {
   incomeCount: number;     // Number of income records at the time of analysis
   expenseCount: number;    // Number of expense records at the time of analysis
 }
+
+function storageKey(userId: string, cacheKey: string): string {
+  return `finova_ai_${cacheKey}_${userId}`;
+}
+
+/**
+ * Read a cached AI result for this user + cache key.
+ * Returns null if nothing is cached yet.
+ */
