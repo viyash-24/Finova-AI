@@ -21,3 +21,5 @@ export async function apiFetch(
     headers.set('Content-Type', 'application/json');
   }
 
+  return fetch(url, { ...options, headers });
+}
