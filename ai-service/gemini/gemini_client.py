@@ -37,3 +37,16 @@ def extract_text(content) -> str:
         return "".join(parts)
     return str(content)
 
+
+# ─────────────────────────────────────────────────────
+#  Model fallback chain
+#  When one model hits its rate/quota limit we automatically
+#  retry the same prompt with the next model in the list.
+# ─────────────────────────────────────────────────────
+
+# Ordered list of model IDs to try. First = preferred (fastest/cheapest).
+_FALLBACK_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+]
