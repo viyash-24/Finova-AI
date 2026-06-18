@@ -27,3 +27,12 @@ function storageKey(userId: string, cacheKey: string): string {
  * Read a cached AI result for this user + cache key.
  * Returns null if nothing is cached yet.
  */
+export function readAiCache(userId: string, cacheKey: string): AiCacheEntry | null {
+  try {
+    const raw = localStorage.getItem(storageKey(userId, cacheKey));
+    if (!raw) return null;
+    return JSON.parse(raw) as AiCacheEntry;
+  } catch {
+    return null;
+  }
+}
