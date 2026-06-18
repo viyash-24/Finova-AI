@@ -13,3 +13,7 @@ export async function apiFetch(
 ): Promise<Response> {
   const token = await getToken();
 
+  const headers = new Headers(options.headers ?? {});
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
