@@ -121,3 +121,23 @@ def call_with_fallback(
 
     raise last_exc  # All models exhausted
 
+
+# ─────────────────────────────────────────────────────
+#  Convenience constructors (kept for backward compat)
+#  These still return single-model LLMs and are used by
+#  CoordinatorAgent for chat (not analyze) calls.
+# ─────────────────────────────────────────────────────
+
+def get_llm():
+    """Primary LLM"""
+    return _make_llm("gemini-2.0-flash", 0.7, 2048)
+
+
+def get_fast_llm():
+    """Fast LLM for routing & chat"""
+    return _make_llm("gemini-2.0-flash", 0.3, 1024)
+
+
+def get_json_llm():
+    """JSON-focused LLM for analyze() calls"""
+    return _make_llm("gemini-2.0-flash", 0.1, 1024, json_mode=True)
