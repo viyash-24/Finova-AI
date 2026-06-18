@@ -54,3 +54,12 @@ export function writeAiCache(
     // localStorage may be unavailable in some private-browsing configurations
   }
 }
+
+/**
+ * Clear cached AI data for this user (call after sign-out or account switch).
+ */
+export function clearAiCache(userId: string, cacheKey: string): void {
+  try {
+    localStorage.removeItem(storageKey(userId, cacheKey));
+  } catch {}
+}
