@@ -47,4 +47,10 @@ export function writeAiCache(
   incomeCount: number,
   expenseCount: number,
 ): void {
-  
+  try {
+    const entry: AiCacheEntry = { data, incomeCount, expenseCount };
+    localStorage.setItem(storageKey(userId, cacheKey), JSON.stringify(entry));
+  } catch {
+    // localStorage may be unavailable in some private-browsing configurations
+  }
+}
