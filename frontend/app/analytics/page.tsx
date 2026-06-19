@@ -109,7 +109,18 @@ export default function AnalyticsPage() {
       ]);
       incomeCount = incRes.ok ? (await incRes.json()).length : 0;
       expenseCount = expRes.ok ? (await expRes.json()).length : 0;
-    } 
+    } catch {}
+
+    if (!forceRefresh && !needsAiRefresh(userId, AI_KEY, incomeCount, expenseCount)) {
+      // Data unchanged — serve from localStorage cache
+      const cached = readAiCache(userId, AI_KEY);
+      if (cached) {
+        _applyAgentData(cached.data);
+        setUpdatedTime('cached');
+        return;
+      }
+    }
+
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
