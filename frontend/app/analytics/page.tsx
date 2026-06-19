@@ -81,6 +81,17 @@ export default function AnalyticsPage() {
 
   const AI_KEY = 'analytics';
 
+  const _applyAgentData = (data: any) => {
+    setAgentExpense(data.expense || null);
+    setAgentSavings(data.savings || null);
+    const recs = data.recommendations || [];
+    const icons = ['auto_awesome', 'restaurant', 'local_taxi', 'savings', 'trending_up'];
+    const mapped: AIInsightData[] = recs.map((rec: string, idx: number) => ({
+      id: String(idx),
+      title: rec.length > 80 ? rec.substring(0, 77) + '...' : rec,
+      description: rec,
+      icon: icons[idx % icons.length],
+    }));
         }
       }
     } catch (err) {
