@@ -97,6 +97,11 @@ export default function AnalyticsPage() {
 
   const fetchAgentInsights = async (forceRefresh = false) => {
     const userId = user?.id;
+    if (!userId) return;
+
+    // Build fingerprint from current record counts
+    let incomeCount = 0;
+    let expenseCount = 0;
    
       }
     } catch (err) {
