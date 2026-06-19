@@ -47,6 +47,12 @@ export default function BillsPage() {
     const userId = user?.id;
     if (!userId) return;
 
+    // Show cached result IMMEDIATELY
+    const cached = readAiCache(userId, AI_KEY);
+    if (cached) {
+      setAiAdvice(cached.data as any);
+    }
+
 
     setAiLoading(true);
     try {
