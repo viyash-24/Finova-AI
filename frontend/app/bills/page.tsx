@@ -61,7 +61,9 @@ export default function BillsPage() {
         apiFetch(getToken, 'http://localhost:8000/api/income'),
         apiFetch(getToken, 'http://localhost:8000/api/expenses'),
       ]);
-
+      incomeCount = incRes.ok ? (await incRes.json()).length : 0;
+      expenseCount = expRes.ok ? (await expRes.json()).length : 0;
+    } 
     setAiLoading(true);
     try {
       const res = await apiFetch(getToken, 'http://localhost:8000/api/ai/agent/bills');
