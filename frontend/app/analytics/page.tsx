@@ -79,6 +79,8 @@ export default function AnalyticsPage() {
     }
   };
 
+  const AI_KEY = 'analytics';
+
         }
       }
     } catch (err) {
