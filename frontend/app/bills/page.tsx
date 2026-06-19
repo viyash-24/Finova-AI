@@ -41,7 +41,8 @@ export default function BillsPage() {
     }
   };
 
- 
+  const AI_KEY = 'bills';
+
 
     setAiLoading(true);
     try {
