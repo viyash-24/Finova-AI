@@ -126,7 +126,8 @@ export default function AnalyticsPage() {
     try {
       const res = await apiFetch(getToken, 'http://localhost:8000/api/ai/agent/analytics');
       if (res.ok) {
-       
+        const data = await res.json();
+        
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
