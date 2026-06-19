@@ -127,7 +127,11 @@ export default function AnalyticsPage() {
       const res = await apiFetch(getToken, 'http://localhost:8000/api/ai/agent/analytics');
       if (res.ok) {
         const data = await res.json();
-        
+        _applyAgentData(data);
+        // Only persist to cache if we got real content (not an error)
+        if (data.expense?.summary && !data.expense.summary.includes('Unable to analyze')) {
+          writeAiCache(userId, AI_KEY, data, incomeCount, expenseCount);
+        }
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
