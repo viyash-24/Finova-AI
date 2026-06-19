@@ -53,6 +53,9 @@ export default function BillsPage() {
       setAiAdvice(cached.data as any);
     }
 
+    // Fetch fingerprint in parallel with bills (bills fetch happens in useEffect)
+    let incomeCount = 0;
+    let expenseCount = 0;
 
     setAiLoading(true);
     try {
