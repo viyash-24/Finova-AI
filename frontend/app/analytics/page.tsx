@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import TopHeader from '@/components/TopHeader';
+import { useAuth, useUser } from '@clerk/nextjs';
+import { apiFetch } from '@/lib/apiFetch';
+import { needsAiRefresh, readAiCache, writeAiCache } from '@/lib/smartAiCache';
 
 interface MonthDataPoint {
   label: string;
@@ -36,6 +39,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 const CATEGORIES = ['Housing', 'Food', 'Transport', 'Entertainment', 'Shopping', 'Dress', 'Other'];
 
 export default function AnalyticsPage() {
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [updatedTime, setUpdatedTime] = useState('loading...');
 
@@ -47,7 +52,7 @@ export default function AnalyticsPage() {
 
   const fetchAnalyticsData = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/dashboard');
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/dashboard');
       if (res.ok) {
         const d = await res.json();
         if (d.cashFlow && d.cashFlow.length > 0) {
@@ -64,7 +69,7 @@ export default function AnalyticsPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:8000/api/expenses');
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/expenses');
       if (res.ok) {
         const data = await res.json();
         setExpenseList(data);
@@ -74,53 +79,6 @@ export default function AnalyticsPage() {
     }
   };
 
-  const SESSION_KEY = 'finova_analytics_ai';
-
-  const fetchAgentInsights = async (bypassCache = false) => {
-    // Check sessionStorage cache first — skip Gemini call if data already exists for this session
-    if (!bypassCache) {
-      const cached = sessionStorage.getItem(SESSION_KEY);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          setAgentExpense(parsed.expense || null);
-          setAgentSavings(parsed.savings || null);
-          const recs = parsed.recommendations || [];
-          const icons = ['auto_awesome', 'restaurant', 'local_taxi', 'savings', 'trending_up'];
-          setInsights(recs.map((rec: string, idx: number) => ({
-            id: String(idx),
-            title: rec.length > 80 ? rec.substring(0, 77) + '...' : rec,
-            description: rec,
-            icon: icons[idx % icons.length],
-          })));
-          setUpdatedTime('cached');
-          return;
-        } catch {}
-      }
-    }
-
-    setIsAnalyzing(true);
-    try {
-      const res = await fetch('http://localhost:8000/api/ai/agent/analytics');
-      if (res.ok) {
-        const data = await res.json();
-        setAgentExpense(data.expense || null);
-        setAgentSavings(data.savings || null);
-
-        // Build insight cards from recommendations
-        const recs = data.recommendations || [];
-        const icons = ['auto_awesome', 'restaurant', 'local_taxi', 'savings', 'trending_up'];
-        const mapped: AIInsightData[] = recs.map((rec: string, idx: number) => ({
-          id: String(idx),
-          title: rec.length > 80 ? rec.substring(0, 77) + '...' : rec,
-          description: rec,
-          icon: icons[idx % icons.length],
-        }));
-        setInsights(mapped);
-
-        // Unconditionally cache results (even errors) to prevent hammering the API when quota is exhausted
-        if (data.expense?.summary) {
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
         }
       }
     } catch (err) {
@@ -133,12 +91,11 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     fetchAnalyticsData();
-    fetchAgentInsights();
-  }, []);
+    if (user?.id) fetchAgentInsights();
+  }, [getToken, user?.id]);
 
-  // Re-run clears the session cache and forces a fresh Gemini analysis
+  // Re-run button forces a fresh Gemini analysis
   const handleTriggerAnalysis = async () => {
-    sessionStorage.removeItem(SESSION_KEY);
     await fetchAgentInsights(true);
   };
 
