@@ -56,6 +56,11 @@ export default function BillsPage() {
     // Fetch fingerprint in parallel with bills (bills fetch happens in useEffect)
     let incomeCount = 0;
     let expenseCount = 0;
+    try {
+      const [incRes, expRes] = await Promise.all([
+        apiFetch(getToken, 'http://localhost:8000/api/income'),
+        apiFetch(getToken, 'http://localhost:8000/api/expenses'),
+      ]);
 
     setAiLoading(true);
     try {
