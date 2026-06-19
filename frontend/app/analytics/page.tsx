@@ -121,6 +121,9 @@ export default function AnalyticsPage() {
       }
     }
 
+    // Data changed or forced — call the agent
+    setIsAnalyzing(true);
+   
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
