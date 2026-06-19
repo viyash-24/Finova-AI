@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import TopHeader from '@/components/TopHeader';
+import { useAuth } from '@clerk/nextjs';
+import { apiFetch } from '@/lib/apiFetch';
 
 interface Message {
   sender: 'ai' | 'user';
@@ -10,6 +12,7 @@ interface Message {
 }
 
 export default function AIAssistantPage() {
+  const { getToken } = useAuth();
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -48,9 +51,8 @@ export default function AIAssistantPage() {
     setIsTyping(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/ai/chat', {
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: trimmed, context: {} }),
       });
       if (res.ok) {

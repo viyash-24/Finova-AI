@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import TopHeader from '@/components/TopHeader';
+import { useAuth, useUser } from '@clerk/nextjs';
+import { apiFetch } from '@/lib/apiFetch';
+import { needsAiRefresh, readAiCache, writeAiCache } from '@/lib/smartAiCache';
 
 interface Bill {
   id: string;
@@ -14,6 +17,8 @@ interface Bill {
 }
 
 export default function BillsPage() {
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const [bills, setBills] = useState<Bill[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [name, setName] = useState('');
@@ -26,7 +31,7 @@ export default function BillsPage() {
 
   const fetchBills = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/bills');
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/bills');
       if (res.ok) {
         const data = await res.json();
         setBills(data);
@@ -36,27 +41,43 @@ export default function BillsPage() {
     }
   };
 
-  const SESSION_KEY = 'finova_bills_ai';
+  const AI_KEY = 'bills';
 
   const fetchBillAgent = async () => {
-    // Check sessionStorage first — only call Gemini if no cached result exists for this session
-    const cached = sessionStorage.getItem(SESSION_KEY);
+    const userId = user?.id;
+    if (!userId) return;
+
+    // Show cached result IMMEDIATELY
+    const cached = readAiCache(userId, AI_KEY);
     if (cached) {
-      try {
-        setAiAdvice(JSON.parse(cached));
-        return;
-      } catch {}
+      setAiAdvice(cached.data as any);
+    }
+
+    // Fetch fingerprint in parallel with bills (bills fetch happens in useEffect)
+    let incomeCount = 0;
+    let expenseCount = 0;
+    try {
+      const [incRes, expRes] = await Promise.all([
+        apiFetch(getToken, 'http://localhost:8000/api/income'),
+        apiFetch(getToken, 'http://localhost:8000/api/expenses'),
+      ]);
+      incomeCount = incRes.ok ? (await incRes.json()).length : 0;
+      expenseCount = expRes.ok ? (await expRes.json()).length : 0;
+    } catch {}
+
+    // If data hasn't changed and cache was shown, we're done
+    if (!needsAiRefresh(userId, AI_KEY, incomeCount, expenseCount) && cached) {
+      return;
     }
 
     setAiLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/ai/agent/bills');
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/ai/agent/bills');
       if (res.ok) {
         const data = await res.json();
         setAiAdvice(data);
-        // Unconditionally cache results (even errors) to prevent hammering the API when quota is exhausted
-        if (data.summary) {
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+        if (data.summary && !data.summary.includes('Unable to analyze')) {
+          writeAiCache(userId, AI_KEY, data, incomeCount, expenseCount);
         }
       }
     } catch (err) {
@@ -68,8 +89,8 @@ export default function BillsPage() {
 
   useEffect(() => {
     fetchBills();
-    fetchBillAgent();
-  }, []);
+    if (user?.id) fetchBillAgent();
+  }, [getToken, user?.id]);
 
   const handleAddBill = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,9 +98,8 @@ export default function BillsPage() {
     if (!name || isNaN(parsedAmount) || parsedAmount <= 0) return;
 
     try {
-      const res = await fetch('http://localhost:8000/api/bills', {
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/bills', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
           provider,
@@ -104,7 +124,7 @@ export default function BillsPage() {
 
   const handleDeleteBill = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/bills/${id}`, {
+      const res = await apiFetch(getToken, `http://localhost:8000/api/bills/${id}`, {
         method: 'DELETE',
       });
       if (res.ok) {
