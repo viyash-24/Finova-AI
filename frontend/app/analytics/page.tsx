@@ -95,6 +95,9 @@ export default function AnalyticsPage() {
     setInsights(mapped);
   };
 
+  const fetchAgentInsights = async (forceRefresh = false) => {
+    const userId = user?.id;
+   
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
