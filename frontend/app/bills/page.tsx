@@ -65,6 +65,10 @@ export default function BillsPage() {
       expenseCount = expRes.ok ? (await expRes.json()).length : 0;
     } catch {}
 
+    // If data hasn't changed and cache was shown, we're done
+    if (!needsAiRefresh(userId, AI_KEY, incomeCount, expenseCount) && cached) {
+      return;
+    }
 
     setAiLoading(true);
     try {
