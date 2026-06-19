@@ -92,7 +92,9 @@ export default function AnalyticsPage() {
       description: rec,
       icon: icons[idx % icons.length],
     }));
-        }
+    setInsights(mapped);
+  };
+
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
