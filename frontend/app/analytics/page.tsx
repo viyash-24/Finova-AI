@@ -102,7 +102,14 @@ export default function AnalyticsPage() {
     // Build fingerprint from current record counts
     let incomeCount = 0;
     let expenseCount = 0;
-   
+    try {
+      const [incRes, expRes] = await Promise.all([
+        apiFetch(getToken, 'http://localhost:8000/api/income'),
+        apiFetch(getToken, 'http://localhost:8000/api/expenses'),
+      ]);
+      incomeCount = incRes.ok ? (await incRes.json()).length : 0;
+      expenseCount = expRes.ok ? (await expRes.json()).length : 0;
+    } 
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
