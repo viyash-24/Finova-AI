@@ -123,7 +123,10 @@ export default function AnalyticsPage() {
 
     // Data changed or forced — call the agent
     setIsAnalyzing(true);
-   
+    try {
+      const res = await apiFetch(getToken, 'http://localhost:8000/api/ai/agent/analytics');
+      if (res.ok) {
+       
       }
     } catch (err) {
       console.warn('Could not fetch agent analytics.', err);
