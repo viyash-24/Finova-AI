@@ -43,6 +43,10 @@ export default function BillsPage() {
 
   const AI_KEY = 'bills';
 
+  const fetchBillAgent = async () => {
+    const userId = user?.id;
+    if (!userId) return;
+
 
     setAiLoading(true);
     try {
